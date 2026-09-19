@@ -17,7 +17,7 @@ Use this skill for a game or sample with ECS-managed 3D content: a `World`, enti
 documents, and scheduled systems. For the surrounding Platform/Bootstrap/Compose composition,
 read [awake-app-composition](../awake-app-composition/SKILL.md) first.
 
-Read [the scene-session simplification plan](../../docs/tasks/2026-08-25-scene-session-simplification-plan.md)
+Read [the scene-session simplification plan](https://github.com/awakekt/awake/blob/main/docs/tasks/2026-08-25-scene-session-simplification-plan.md)
 and inspect the actual scene runtime API before writing a DSL call. The session names in that plan
 are the target shape; use the current compatibility API only where it exists today.
 

@@ -70,18 +70,8 @@ This skill defines the operational boundary between **GitHub Milestones & Issues
      ```bash
      gh issue create --title "feat: <epic title>" --body "<body>" --milestone "<milestone-name>"
      ```
-   - Create a sub-issue directly linked to a parent:
-     ```bash
-     python3 ~/.agents/skills/kmp-github-issue-governance/scripts/gh_sub_issue.py create <parent-number> --title "<title>" --body-file <payload.md> [--label "<label>"] [--milestone "<milestone>"]
-     ```
-   - Attach an existing issue as a sub-issue of a parent:
-     ```bash
-     python3 ~/.agents/skills/kmp-github-issue-governance/scripts/gh_sub_issue.py add <parent-number> <child-number>
-     ```
-   - List all sub-issues of a parent issue:
-     ```bash
-     python3 ~/.agents/skills/kmp-github-issue-governance/scripts/gh_sub_issue.py list <parent-number>
-     ```
+   - Create, attach, and list sub-issues with GitHub's current REST or GraphQL API. Do not
+     invoke a helper through a user-local or deployed agent-skill path.
    - Close an issue when work lands:
      ```bash
      gh issue close <issue-number>

@@ -16,7 +16,7 @@ metadata:
 Use this skill when assembling an application, sample, editor, or tool. It governs composition;
 it does not replace the ECS, rendering, or UI-authoring skills.
 
-Read [the scene-session simplification plan](../../docs/tasks/2026-08-25-scene-session-simplification-plan.md)
+Read [the scene-session simplification plan](https://github.com/awakekt/awake/blob/main/docs/tasks/2026-08-25-scene-session-simplification-plan.md)
 and the `README.md` files in `awake/engine/platform`, `awake/engine/bootstrap`, and `awake/scene`
 before changing a cross-module boundary.
 

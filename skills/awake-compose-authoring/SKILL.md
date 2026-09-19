@@ -18,20 +18,20 @@ Compose: it has no compiler plugin, snapshot isolation, `@Composable`,
 `rememberSaveable`, `ViewModel`, `LaunchedEffect`, or `DisposableEffect`. Do not copy an upstream
 Compose snippet without translating its lifetime and state assumptions.
 
-Read [the Compose engine README](../../awake/compose/README.md) and [the detailed design specs](../../docs/reference/compose-engine/README.md) before authoring.
+Read [the Compose engine README](https://github.com/awakekt/awake/blob/main/awake/compose/README.md) and [the detailed design specs](https://github.com/awakekt/awake/blob/main/docs/reference/compose-engine/README.md) before authoring.
 Then read the focused references below when their decision is involved:
 
 | Need | Read |
 |---|---|
-| Ambient UI dependency | [`03-composition-locals.md`](../../docs/reference/compose-engine/03-composition-locals.md) |
-| Modifier state or a new modifier | [`02-modifier.md`](../../docs/reference/compose-engine/02-modifier.md) and [`17-modifier-parity.md`](../../docs/reference/compose-engine/17-modifier-parity.md) |
-| Repeated, subcomposed, or lazy content | [`08-lazy-lists.md`](../../docs/reference/compose-engine/08-lazy-lists.md) and `SubcomposeLayout` / `BoxWithConstraints` |
-| Gestures, multi-touch, or nested scroll | `Modifier.transformable`, `Modifier.nestedScroll`, [`12-gestures.md`](../../docs/reference/compose-engine/12-gestures.md) |
-| Custom caching or sibling layer ordering | `Modifier.drawWithCache`, `Modifier.zIndex`, [`10-graphics-layer.md`](../../docs/reference/compose-engine/10-graphics-layer.md) |
+| Ambient UI dependency | [`03-composition-locals.md`](https://github.com/awakekt/awake/blob/main/docs/reference/compose-engine/03-composition-locals.md) |
+| Modifier state or a new modifier | [`02-modifier.md`](https://github.com/awakekt/awake/blob/main/docs/reference/compose-engine/02-modifier.md) and [`17-modifier-parity.md`](https://github.com/awakekt/awake/blob/main/docs/reference/compose-engine/17-modifier-parity.md) |
+| Repeated, subcomposed, or lazy content | [`08-lazy-lists.md`](https://github.com/awakekt/awake/blob/main/docs/reference/compose-engine/08-lazy-lists.md) and `SubcomposeLayout` / `BoxWithConstraints` |
+| Gestures, multi-touch, or nested scroll | `Modifier.transformable`, `Modifier.nestedScroll`, [`12-gestures.md`](https://github.com/awakekt/awake/blob/main/docs/reference/compose-engine/12-gestures.md) |
+| Custom caching or sibling layer ordering | `Modifier.drawWithCache`, `Modifier.zIndex`, [`10-graphics-layer.md`](https://github.com/awakekt/awake/blob/main/docs/reference/compose-engine/10-graphics-layer.md) |
 | Decide whether a gap belongs to a component, its parent, or a distinct layout relationship | [`references/structural-spacing.md`](references/structural-spacing.md) |
 | Choose fixed versus adaptive size, Row/Column vs FlowRow/FlowColumn vs FlexBox, preview frames, Spacer, arrangement, or alignment | [`awake-ui-layout-guidance`](../awake-ui-layout-guidance/SKILL.md) |
-| A deliberate API divergence | [`11-refinements.md`](../../docs/reference/compose-engine/11-refinements.md) and [`15-compose-parity.md`](../../docs/reference/compose-engine/15-compose-parity.md) |
-| Before building a new draw primitive, `DrawScope` method, or modifier capability | [`15-compose-parity.md`](../../docs/reference/compose-engine/15-compose-parity.md) (what's already **Built** vs a real **Gap**), [`11-refinements.md`](../../docs/reference/compose-engine/11-refinements.md) (whether a divergence has the evidence to be legitimate), and [`10-graphics-layer.md`](../../docs/reference/compose-engine/10-graphics-layer.md) (what's a known, documented non-fixed limitation rather than an oversight) — check all three before designing something new. |
+| A deliberate API divergence | [`11-refinements.md`](https://github.com/awakekt/awake/blob/main/docs/reference/compose-engine/11-refinements.md) and [`15-compose-parity.md`](https://github.com/awakekt/awake/blob/main/docs/reference/compose-engine/15-compose-parity.md) |
+| Before building a new draw primitive, `DrawScope` method, or modifier capability | [`15-compose-parity.md`](https://github.com/awakekt/awake/blob/main/docs/reference/compose-engine/15-compose-parity.md) (what's already **Built** vs a real **Gap**), [`11-refinements.md`](https://github.com/awakekt/awake/blob/main/docs/reference/compose-engine/11-refinements.md) (whether a divergence has the evidence to be legitimate), and [`10-graphics-layer.md`](https://github.com/awakekt/awake/blob/main/docs/reference/compose-engine/10-graphics-layer.md) (what's a known, documented non-fixed limitation rather than an oversight) — check all three before designing something new. |
 
 For application-root, scene-session, or `ComposeHost` work, also use `awake-app-composition`.
 For Store/Contract, intents, effects, or application/editor state, also use

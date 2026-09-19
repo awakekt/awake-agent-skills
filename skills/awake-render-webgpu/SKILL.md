@@ -10,7 +10,7 @@ description: >
 
 Awake's WebGPU backend (`:awake:backend:webgpu`) targets cross-platform GPU execution on Web (WasmJs) and native desktop via `wgpu4k`/Dawn.
 
-Read [docs/architecture.md](../../docs/architecture.md), [docs/mvp-plan.md](../../docs/mvp-plan.md), and [skills/awake-render-pipeline/SKILL.md](../awake-render-pipeline/SKILL.md) first.
+Read [docs/architecture.md](https://github.com/awakekt/awake/blob/main/docs/architecture.md), [docs/mvp-plan.md](https://github.com/awakekt/awake/blob/main/docs/mvp-plan.md), and [skills/awake-render-pipeline/SKILL.md](../awake-render-pipeline/SKILL.md) first.
 
 ## Hardware only
 

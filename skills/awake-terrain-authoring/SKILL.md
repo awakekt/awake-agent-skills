@@ -8,8 +8,8 @@ metadata:
 
 # Awake Terrain Authoring
 
-Read [the terrain plan](../../docs/tasks/2026-08-24-terrain-rendering-plan.md) and
-[the framework/game boundary](../../docs/reference/framework-game-boundary.md) before adding a
+Read [the terrain plan](https://github.com/awakekt/awake/blob/main/docs/tasks/2026-08-24-terrain-rendering-plan.md) and
+[the framework/game boundary](https://github.com/awakekt/awake/blob/main/docs/reference/framework-game-boundary.md) before adding a
 terrain capability.
 
 ## Terrain Paradigms: Geometry Clipmaps vs Cell Worldstream

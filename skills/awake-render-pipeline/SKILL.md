@@ -5,7 +5,7 @@ description: Rules for structuring render features, pipelines, materials and the
 
 # Render feature / pipeline / material architecture in Awake
 
-Pairs with [render-extensibility.md](../../docs/reference/render-extensibility.md), which
+Pairs with [render-extensibility.md](https://github.com/awakekt/awake/blob/main/docs/reference/render-extensibility.md), which
 governs *whether* a pipeline is opt-in content vs an always-available capability. This skill
 governs *how* render features, pipelines and materials are structured and composed once that
 call is made.
@@ -137,7 +137,7 @@ registration and pass dispatch ordering — don't create a shared pass-ownership
 because you can. It does **not** mean "keep adding scene vocabulary to `GpuDevice`/`Renderer`".
 Those are separate concerns: the HAL boundary (§0.5) is non-negotiable regardless of how many
 passes exist. See
-[docs/audits/2026-08-19-render-feature-strategy-plan.md](../../docs/audits/2026-08-19-render-feature-strategy-plan.md)
+[docs/audits/2026-08-19-render-feature-strategy-plan.md](https://github.com/awakekt/awake/blob/main/docs/audits/2026-08-19-render-feature-strategy-plan.md)
 for the full worked design, including why the receiver-on-`Renderer` shortcut and an earlier
 3-way sealed hierarchy were both rejected.
 

@@ -13,17 +13,17 @@ Maintain Awake's repository-facing documentation and agent workflow surface. Kee
 documentation useful to developers and agents by ensuring it describes the code, modules,
 commands, skills, and architecture that actually exist.
 
-Read [docs/architecture/architecture.md](../../../../docs/architecture/architecture.md),
-[docs/reference/ai-collaboration.md](../../../../docs/reference/ai-collaboration.md),
-[docs/reference/agent-catalog.md](../../../../docs/reference/agent-catalog.md), and the relevant
+Read [docs/architecture/architecture.md](https://github.com/awakekt/awake/blob/main/docs/architecture/architecture.md),
+[docs/reference/ai-collaboration.md](https://github.com/awakekt/awake/blob/main/docs/reference/ai-collaboration.md),
+[the public agent catalog](https://github.com/awakekt/awake-agent-skills/blob/main/docs/agent-catalog.md), and the relevant
 source files before editing.
 
 ## Owns
 
 - `README.md`, `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md` consistency
 - `docs/` reference pages, architecture decisions, module documentation, and indexes
-- `docs/reference/agent-catalog.md` and agent/skill/command routing consistency
-- `.agents/skills/awake/agents/*.md` and `.agents/commands/*.md` documentation guidance
+- the public agent catalog and agent/skill/command routing consistency
+- installed `awake-agent-skills` personas and commands, without editing their deployed copies
 - Identifying stale module names, paths, commands, links, counts, and validation instructions
 
 ## Does Not Own
@@ -35,7 +35,7 @@ source files before editing.
 ## Working Rules
 
 1. Treat `docs/*` as the canonical source of Awake design and architecture policy.
-2. Treat `.agents/skills/awake/*` as repo-local execution guidance, not a parallel architecture
+2. Treat the pinned `awake-agent-skills` release as execution guidance, not a parallel architecture
    specification.
 3. Read the live files from disk before editing; never trust a previous skill count, module path,
    or command inventory.
@@ -56,12 +56,11 @@ source files before editing.
 After changing agent, skill, command, or routing documentation, run:
 
 ```bash
-python3 tools/verify_agent_skills_sync.py
-python3 tools/verify_skill_spec.py
+python3 scripts/verify_bundle.py
 ```
 
-Run the relevant documentation or UI validation command as well when the changed docs describe
-those workflows.
+In an Awake checkout, also run the relevant product documentation or UI validation command when
+the changed docs describe those workflows.
 
 ## Handoffs
 

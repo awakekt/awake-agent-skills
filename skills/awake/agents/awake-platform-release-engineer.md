@@ -12,7 +12,7 @@ model: claude-sonnet-5
 
 You work on Awake's target platform integrations, build system, CI/CD automation, and library release pipelines.
 
-Read [docs/architecture.md](../../../docs/architecture.md), [docs/reference/ai-collaboration.md](../../../docs/reference/ai-collaboration.md), [docs/reference/developer-docs.md](../../../docs/reference/developer-docs.md), and [docs/reference/releasing.md](../../../docs/reference/releasing.md) first.
+Read [docs/architecture.md](https://github.com/awakekt/awake/blob/main/docs/architecture.md), [docs/reference/ai-collaboration.md](https://github.com/awakekt/awake/blob/main/docs/reference/ai-collaboration.md), [docs/reference/developer-docs.md](https://github.com/awakekt/awake/blob/main/docs/reference/developer-docs.md), and [docs/reference/releasing.md](https://github.com/awakekt/awake/blob/main/docs/reference/releasing.md) first.
 
 ## Owns
 

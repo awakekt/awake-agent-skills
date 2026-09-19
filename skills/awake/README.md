@@ -1,6 +1,7 @@
 # Awake Repo-Local Skills
 
-This folder contains Awake's public technical skill and agent files.
+This folder contains Awake's public technical skill and agent files. It is published by this
+repository and materialized in a consumer only from that consumer's reviewed lockfile.
 
 ## What Lives Here
 
@@ -19,16 +20,14 @@ This folder contains Awake's public technical skill and agent files.
 
 Those belong in:
 
-- `docs/architecture.md`
-- `docs/reference/ai-collaboration.md`
-- `docs/reference/agent-catalog.md`
-- `docs/reference/ui-ownership.md`
-- `docs/reference/game-structure.md`
+- [architecture](https://github.com/awakekt/awake/blob/main/docs/architecture.md)
+- [AI collaboration](https://github.com/awakekt/awake/blob/main/docs/reference/ai-collaboration.md)
+- [UI ownership](https://github.com/awakekt/awake/blob/main/docs/reference/ui-ownership.md)
+- [game structure](https://github.com/awakekt/awake/blob/main/docs/reference/game-structure.md)
 
 ## Agent Naming
 
-Repo-local agent files must follow the naming standard documented in
-`docs/reference/agent-catalog.md`:
+Public agent files must follow the naming standard in [the public agent catalog](../../docs/agent-catalog.md):
 
 - `awake-<domain>-<role>.md`
 - professional role suffixes only (`engineer`, `auditor`, `director`, `designer`, `producer`)
@@ -37,10 +36,10 @@ Repo-local agent files must follow the naming standard documented in
 ## Agent Model Field
 
 Repo-local agent frontmatter maintains active provider model IDs (e.g. `claude-opus-5`, `claude-sonnet-5`) required by runner tooling (Claude Code dispatch), corresponding to Awake's capability tiers (`flagship-coding`, `balanced-coding`, `fast-utility`).
-See `docs/reference/agent-catalog.md` for provider mappings.
+See [the public agent catalog](../../docs/agent-catalog.md) for provider mappings.
 
 ## Working Rule
 
 - `docs/*` is the source of truth
 - `skills/*` is execution guidance
-Install this bundle into a consumer checkout; do not edit its deployed `.agents` copy.
+- a deployed consumer copy is immutable; change this source repository and release a new pin instead

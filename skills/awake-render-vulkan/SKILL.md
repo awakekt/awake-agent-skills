@@ -11,7 +11,7 @@ description: >
 
 Awake's Vulkan backend (`:awake:backend:vulkan`, `:awake:backend:vulkan:bindings`, and `:awake:backend:vulkan:bindings:android-native`) provides direct, high-performance hardware rendering without large engine runtime overhead.
 
-Read [docs/architecture.md](../../docs/architecture.md), [docs/mvp-plan.md](../../docs/mvp-plan.md), and [skills/awake-render-pipeline/SKILL.md](../awake-render-pipeline/SKILL.md) first.
+Read [docs/architecture.md](https://github.com/awakekt/awake/blob/main/docs/architecture.md), [docs/mvp-plan.md](https://github.com/awakekt/awake/blob/main/docs/mvp-plan.md), and [skills/awake-render-pipeline/SKILL.md](../awake-render-pipeline/SKILL.md) first.
 
 ## Hardware only
 
@@ -32,7 +32,7 @@ Every Vulkan creation path must have an explicit, symmetrical destruction path:
 
 - `awake:backend:vulkan:bindings` contains ~126 generated files (`models/`, `enums/`) and 6 hand-authored root files (`Vulkan.kt`, `Common.kt`, `Annotations.kt`, `Flags.kt`, `VulkanSurface.kt`, `Version.kt`).
 - **Rule**: Never hand-edit files in `models/` or `enums/` or the C++ JNI accessors. Always run the code generator in `:awake:backend:vulkan:generator`.
-- Check [`awake/backend/vulkan/README.md`](../../awake/backend/vulkan/README.md) before modifying binding layers.
+- Check [`awake/backend/vulkan/README.md`](https://github.com/awakekt/awake/blob/main/awake/backend/vulkan/README.md) before modifying binding layers.
 
 ## 3. Swapchain & Surface Resize Behavior
 

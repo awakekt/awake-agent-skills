@@ -15,7 +15,7 @@ guessing intent, and no box-model margin. Every mapping below is checked against
 Where there is no equivalent, this doc says so instead of inventing one.
 
 > **Before translating**: read
-> [`docs/reference/compose-modifier-layout-guidance.md`](../../docs/reference/compose-modifier-layout-guidance.md)
+> [`docs/reference/compose-modifier-layout-guidance.md`](https://github.com/awakekt/awake/blob/main/docs/reference/compose-modifier-layout-guidance.md)
 > for the authoritative Awake modifier reference — every field, its Compose equivalent, divergences,
 > and known unsafe patterns (e.g. `fillMaxWidth()` in unbounded parents). This CSS skill maps
 > *from* Tailwind; that doc maps *to* Compose — together they give the full picture.

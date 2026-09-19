@@ -12,9 +12,9 @@ description: How to prove a UI change is correct in Awake - which tool answers w
 > |---|---|
 > | *Is anything wrong?* | `scripts/awake verify` — every gate, one run |
 > | *Which tool answers my question, and may I re-record this baseline?* | [`skills/awake-ui-verification`](SKILL.md) — judgment |
-> | *What proof does this kind of UI change require?* | [`docs/reference/ui-validation.md`](../../docs/reference/ui-validation.md) — policy |
-> | *What commands do I run, in what order?* | [`docs/reference/ui-parity-tool.md`](../../docs/reference/ui-parity-tool.md) — procedure |
-> | *What is this script, and can it fail a build?* | [`tools/README.md`](../../tools/README.md) — catalogue |
+> | *What proof does this kind of UI change require?* | [`docs/reference/ui-validation.md`](https://github.com/awakekt/awake/blob/main/docs/reference/ui-validation.md) — policy |
+> | *What commands do I run, in what order?* | [`docs/reference/ui-parity-tool.md`](https://github.com/awakekt/awake/blob/main/docs/reference/ui-parity-tool.md) — procedure |
+> | *What is this script, and can it fail a build?* | [`tools/README.md`](https://github.com/awakekt/awake/blob/main/tools/README.md) — catalogue |
 <!-- /ui-tooling-map -->
 
 
@@ -36,7 +36,7 @@ Preserve accuracy without repeating expensive work during iteration:
 
 The tier is a cost boundary, not an evidence exemption. A component cannot be called complete until
 the merge tier and all required state oracles have passed. The canonical command sequence is in
-[`docs/reference/ui-parity-tool.md`](../../docs/reference/ui-parity-tool.md).
+[`docs/reference/ui-parity-tool.md`](https://github.com/awakekt/awake/blob/main/docs/reference/ui-parity-tool.md).
 
 For shadcn work, follow [`awake-shadcn-parity-workflow`](../awake-shadcn-parity-workflow/SKILL.md):
 prove the pinned reference, standalone recipe, and real catalog shell separately before claiming
@@ -44,7 +44,7 @@ parity.
 
 ## When to create a core-issue entry
 
-Use [`docs/reference/ui-parity-core-issues.md`](../../docs/reference/ui-parity-core-issues.md)
+Use [`docs/reference/ui-parity-core-issues.md`](https://github.com/awakekt/awake/blob/main/docs/reference/ui-parity-core-issues.md)
 only after evidence proves a remaining mismatch cannot be fixed in the component recipe, token
 mapping, fixture, or comparison tooling. A normal wrong color, padding, icon, behavior, or
 missing token is active parity work, not an issue-tracker entry. Each entry must identify the

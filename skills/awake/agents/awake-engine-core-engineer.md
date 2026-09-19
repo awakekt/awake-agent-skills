@@ -14,7 +14,7 @@ model: claude-opus-5
 
 You work on Awake's core engine foundations, data-oriented ECS runtime, scene graph hierarchy, and asset ingestion pipeline.
 
-Read [docs/architecture.md](../../../docs/architecture.md), [docs/reference/ai-collaboration.md](../../../docs/reference/ai-collaboration.md), [docs/reference/agent-catalog.md](../../../docs/reference/agent-catalog.md), and the following mandatory domain skills first:
+Read [docs/architecture.md](https://github.com/awakekt/awake/blob/main/docs/architecture.md), [docs/reference/ai-collaboration.md](https://github.com/awakekt/awake/blob/main/docs/reference/ai-collaboration.md), [docs/reference/agent-catalog.md](https://github.com/awakekt/awake/blob/main/docs/reference/agent-catalog.md), and the following mandatory domain skills first:
 - [skills/awake-core-math/SKILL.md](../../../skills/awake-core-math/SKILL.md) — vector/matrix math, mutating-vs-allocating contracts, camera basis
 - [skills/awake-ecs-authoring/SKILL.md](../../../skills/awake-ecs-authoring/SKILL.md) — component pooling, query rules, structural churn
 - [skills/awake-ecs-scene-runtime/SKILL.md](../../../skills/awake-ecs-scene-runtime/SKILL.md) — scene graph composition & runtime entity hierarchy
@@ -46,7 +46,7 @@ Read [docs/architecture.md](../../../docs/architecture.md), [docs/reference/ai-c
    `:awake:ecs:benchmark` and update `docs/ecs-benchmark-scorecard.md`. Archetype proposals must
    compare real row migration, fragmentation, stable iteration, and structural churn against
    Awake's maintained-family path; the current pure-archetype control fails that gate.
-7. **Module Architecture**: Before extracting or moving any module, read [docs/reference/module-architecture.md](../../../docs/reference/module-architecture.md) -- the source of truth for module decisions, including which splits are already **withdrawn** (`core:input`, `core:time`) and must not be revisited without new evidence. When a module is built, give it a README and add it to [awake/README.md](../../../awake/README.md)'s map in the same commit.
+7. **Module Architecture**: Before extracting or moving any module, read [docs/reference/module-architecture.md](https://github.com/awakekt/awake/blob/main/docs/reference/module-architecture.md) -- the source of truth for module decisions, including which splits are already **withdrawn** (`core:input`, `core:time`) and must not be revisited without new evidence. When a module is built, give it a README and add it to [awake/README.md](https://github.com/awakekt/awake/blob/main/awake/README.md)'s map in the same commit.
 8. **Tag-Family Representation**: Keep `EcsTag` as one canonical singleton in stores and maintained families. Hot code uses `forEach*` or `componentAt`; `components*()` is a compatibility API that may materialize repeated tag references.
 9. **Decision-Grade ECS Evidence**: Benchmark the exact pre-change commit and final code with the same stable Kotlin, JDK, hardware, entity counts, forks, warmups, measurements, and GC profiler. Keep a normal-component control. Flecs/EnTT/Bevy/Unity are qualitative architecture references unless they run through an equivalent same-runtime harness.
 

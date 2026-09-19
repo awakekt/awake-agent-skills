@@ -33,7 +33,7 @@ def load_lock(path: Path) -> list[dict]:
         raise ValueError("lockfile must declare version = 1 and one or more [[source]] entries")
     entries = data["source"]
     for entry in entries:
-        required = ("id", "kind", "repository", "tag", "commit", "archive_sha256", "skill_root", "skills")
+        required = ("id", "kind", "source", "tag", "commit", "archive_sha256", "skill_root", "skills")
         if any(not entry.get(key) for key in required):
             raise ValueError(f"source {entry.get('id', '<unknown>')} is missing a required field")
         if entry["kind"] not in KINDS or not COMMIT.fullmatch(entry["commit"]) or not DIGEST.fullmatch(entry["archive_sha256"]):
@@ -47,7 +47,10 @@ def cache_source(project: Path, entry: dict) -> Path:
     cache = project / ".agents" / "vendor" / f"{entry['id']}@{entry['commit']}"
     if not cache.exists():
         cache.parent.mkdir(parents=True, exist_ok=True)
-        run("git", "clone", "--no-checkout", entry["repository"], str(cache))
+        run("git", "clone", "--no-checkout", entry["source"], str(cache))
+    origin = run("git", "config", "--get", "remote.origin.url", cwd=cache)
+    if origin.rstrip("/") != entry["source"].rstrip("/"):
+        raise ValueError(f"{entry['id']}: cache origin does not match the lockfile source")
     if run("git", "rev-parse", "HEAD", cwd=cache) != entry["commit"]:
         run("git", "fetch", "--tags", "origin", entry["commit"], cwd=cache)
     # `git clone --no-checkout` may already have the requested HEAD but intentionally leaves the
@@ -75,8 +78,11 @@ def deploy(source: Path, destination: Path, names: list[str]) -> None:
         try:
             target.symlink_to(origin)
         except OSError:
-            shutil.copytree(origin, target)
-            (target / ".agent-source").write_text(str(origin) + "\n", encoding="utf-8")
+            if origin.is_dir():
+                shutil.copytree(origin, target)
+                (target / ".agent-source").write_text(str(origin) + "\n", encoding="utf-8")
+            else:
+                shutil.copy2(origin, target)
 
 
 def install(project: Path, lock: Path) -> None:

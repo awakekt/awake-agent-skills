@@ -51,8 +51,8 @@ control does not go in foundation.
 
 Before adding a new function to `UiModifier` (any file in `awake/ui/ui-core/.../modifier/`)
 or to the layout DSL (`row`/`column`/`box`/`Arrangement`/`Alignment`), check
-[`docs/reference/mirror-map.md`](../../../docs/reference/mirror-map.md) (status table) and
-[`docs/reference/compose-modifier-layout-guidance.md`](../../../docs/reference/compose-modifier-layout-guidance.md)
+[`docs/reference/mirror-map.md`](https://github.com/awakekt/awake/blob/main/docs/reference/mirror-map.md) (status table) and
+[`docs/reference/compose-modifier-layout-guidance.md`](https://github.com/awakekt/awake/blob/main/docs/reference/compose-modifier-layout-guidance.md)
 (how-to + code examples) first:
 
 - **A real Compose function with this name/shape already exists and Awake doesn't have
@@ -78,10 +78,10 @@ Same rule for `Arrangement`/`Alignment`/scroll/graphics-layer helpers — anythi
 `ui-core`'s Compose-mimicking surface, not just `Modifier` itself. That surface now has two
 more first-class how-to docs beyond the Modifier/layout one: `row`/`column`/`box`/`Arrangement`
 usage (including the trial-measure model's real consequence for callers) is covered by
-[`compose-modifier-layout-guidance.md`](../../../docs/reference/compose-modifier-layout-guidance.md)'s
+[`compose-modifier-layout-guidance.md`](https://github.com/awakekt/awake/blob/main/docs/reference/compose-modifier-layout-guidance.md)'s
 "Layout DSL" section, and `animateFloat`/`animateFloatTween`/`animateFloatRepeatable`/`Easing`/
 `rememberTransition`/`animatedVisibility` by the sibling
-[`compose-animation-guidance.md`](../../../docs/reference/compose-animation-guidance.md) (a separate
+[`compose-animation-guidance.md`](https://github.com/awakekt/awake/blob/main/docs/reference/compose-animation-guidance.md) (a separate
 doc since animation lives in its own `awake:ui:animation` module). Check the relevant one before
 adding to either surface, same rule as above.
 
@@ -120,7 +120,7 @@ it actively hides the shared root cause and makes the eventual core fix harder, 
 each workaround must then be identified and unwound. The parity tool's own triage table
 encodes the same rule from the other direction ("child geometry drifts but parent passes →
 inspect `fillMax*`, intrinsic measurement, weights, and child modifiers"). See
-[`docs/tasks/2026-08-21-modifier-layout-compose-parity-plan.md`](../../../docs/tasks/2026-08-21-modifier-layout-compose-parity-plan.md)
+[`docs/tasks/2026-08-21-modifier-layout-compose-parity-plan.md`](https://github.com/awakekt/awake/blob/main/docs/tasks/2026-08-21-modifier-layout-compose-parity-plan.md)
 for the full two-axis framing (Compose behavioral parity vs. shadcn visual parity) and why
 a visible shadcn drift is often a `Modifier`/layout defect wearing a design-system costume.
 
@@ -207,7 +207,7 @@ failure directions follow from this, both silent:
 
 1. An `id` built from a value that itself changes resets state with no compile-time signal —
    the same footgun class `animateFloat(id, ...)` already has (see
-   [`compose-animation-guidance.md`](../../../docs/reference/compose-animation-guidance.md)).
+   [`compose-animation-guidance.md`](https://github.com/awakekt/awake/blob/main/docs/reference/compose-animation-guidance.md)).
 2. Two unrelated widgets that end up passing the identical `id` string silently *share* one
    `WidgetState` bucket. `UiContext`'s duplicate-id throw (see
    [`identity-and-catalog.md`](identity-and-catalog.md)) does **not** catch this for bare hook
@@ -217,7 +217,7 @@ failure directions follow from this, both silent:
 
 Full identity model (the two-level `id`/`key` shape, trial-measurement guard behavior, and the
 `rememberPopupState`/`rememberScrollState` specifics) is in
-[`mirror-map.md`](../../../docs/reference/mirror-map.md)'s "State hooks" section — read it before
+[`mirror-map.md`](https://github.com/awakekt/awake/blob/main/docs/reference/mirror-map.md)'s "State hooks" section — read it before
 adding a new `remember*` hook or reasoning about whether an existing one is safe to call from a
 loop or a dynamically-keyed list. `docs/reference/ui-ownership.md`'s "Identity Params" table
 already documents the `id`/`testTag`/`cacheKey` three-way split and the two-level `id`/`key`

@@ -12,7 +12,7 @@ Awake's physics subsystem is partitioned into two clean layers:
 1. `:awake:physics:api` — the pure Kotlin, dependency-free physics contract (rigid bodies, shapes, queries, collision events).
 2. `:awake:backend:jolt` — the high-performance C++ JNI bridge to Jolt Physics.
 
-Read [docs/architecture.md](../../docs/architecture.md), [docs/reference/game-structure.md](../../docs/reference/game-structure.md), and [skills/awake-ecs-authoring/SKILL.md](../awake-ecs-authoring/SKILL.md) first.
+Read [docs/architecture.md](https://github.com/awakekt/awake/blob/main/docs/architecture.md), [docs/reference/game-structure.md](https://github.com/awakekt/awake/blob/main/docs/reference/game-structure.md), and [skills/awake-ecs-authoring/SKILL.md](../awake-ecs-authoring/SKILL.md) first.
 
 ## 1. Clean Architecture Boundary
 

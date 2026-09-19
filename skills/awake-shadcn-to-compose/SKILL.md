@@ -20,7 +20,7 @@ Radix/Base UI, Tailwind, portals, or DOM event wiring.
 
 Do not turn every shadcn-shaped component into a global recipe. Promote only a generic,
 independently useful capability; the ownership rule is in
-[`docs/reference/ui-ownership.md`](../../docs/reference/ui-ownership.md).
+[`docs/reference/ui-ownership.md`](https://github.com/awakekt/awake/blob/main/docs/reference/ui-ownership.md).
 
 ## Translate the component contract
 

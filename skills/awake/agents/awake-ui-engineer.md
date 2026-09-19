@@ -13,7 +13,7 @@ model: claude-sonnet-5
 
 You work on Awake's immediate-mode UI stack, from low-level layout mechanics to Shadcn design system components and automated visual verification.
 
-Read [docs/architecture.md](../../../docs/architecture.md), [docs/reference/ai-collaboration.md](../../../docs/reference/ai-collaboration.md), [docs/reference/ui-ownership.md](../../../docs/reference/ui-ownership.md), [docs/reference/ui-validation.md](../../../docs/reference/ui-validation.md), and the following mandatory domain skills first:
+Read [docs/architecture.md](https://github.com/awakekt/awake/blob/main/docs/architecture.md), [docs/reference/ai-collaboration.md](https://github.com/awakekt/awake/blob/main/docs/reference/ai-collaboration.md), [docs/reference/ui-ownership.md](https://github.com/awakekt/awake/blob/main/docs/reference/ui-ownership.md), [docs/reference/ui-validation.md](https://github.com/awakekt/awake/blob/main/docs/reference/ui-validation.md), and the following mandatory domain skills first:
 - [skills/awake-ui-authoring/SKILL.md](../../../skills/awake-ui-authoring/SKILL.md) — layer boundaries (`ui-core` vs `ui-headless` vs `ui-designsystem`), Dp-not-pixels
 - [skills/awake-shadcn-recipe-consuming/SKILL.md](../../../skills/awake-shadcn-recipe-consuming/SKILL.md) — consuming `shadcn*` recipes in apps/games
 - [skills/awake-shadcn-recipe-authoring/SKILL.md](../../../skills/awake-shadcn-recipe-authoring/SKILL.md) — shared recipe authoring, variant merging, state rules
@@ -24,13 +24,13 @@ Read [docs/architecture.md](../../../docs/architecture.md), [docs/reference/ai-c
 - [skills/awake-ui-css-modifier/SKILL.md](../../../skills/awake-ui-css-modifier/SKILL.md) — legacy `ui:*` CSS mapping only; do not use for new Compose-native ports
 - [skills/awake-ui-icons/SKILL.md](../../../skills/awake-ui-icons/SKILL.md) — SVG-to-`UiImageVector` generation rules (never hand-write path data)
 - [skills/awake-ui-verification/SKILL.md](../../../skills/awake-ui-verification/SKILL.md) — visual snapshots, parity tests, and structural checks
-- [docs/reference/ui-parity-tool.md](../../../docs/reference/ui-parity-tool.md) — manifest-backed source-to-Awake workflow, reports, and sizing translation
+- [docs/reference/ui-parity-tool.md](https://github.com/awakekt/awake/blob/main/docs/reference/ui-parity-tool.md) — manifest-backed source-to-Awake workflow, reports, and sizing translation
 
 **Before writing any `Modifier.*`, layout DSL (`row`/`column`/`box`/`Arrangement`), animation, or
 `remember*` state-hook code** also read:
-- [docs/reference/mirror-map.md](../../../docs/reference/mirror-map.md) — Faithful/Diverges/Not-implemented status table for every Compose-mimicking surface (`Modifier`, Scope/DSL, State hooks, Animation, `graphicsLayer`), each row backed by a direct source read
-- [docs/reference/compose-modifier-layout-guidance.md](../../../docs/reference/compose-modifier-layout-guidance.md) — complete Jetpack Compose vs Awake modifier/layout parity reference: what each modifier does, where it diverges, safe usage patterns, what is not yet implemented, and the `row()`/`column()`/`box()`/`Arrangement` Layout DSL section (real defaults, the trial-measure model's consequence for callers)
-- [docs/reference/compose-animation-guidance.md](../../../docs/reference/compose-animation-guidance.md) — `animateFloat`/`animateFloatTween`/`animateFloatRepeatable`/`Easing`/`rememberTransition`/`animatedVisibility` how-to: the `id`-stability footgun, the trial-measurement guard, retarget semantics, and the missing reusable `AnimationSpec` value type
+- [docs/reference/mirror-map.md](https://github.com/awakekt/awake/blob/main/docs/reference/mirror-map.md) — Faithful/Diverges/Not-implemented status table for every Compose-mimicking surface (`Modifier`, Scope/DSL, State hooks, Animation, `graphicsLayer`), each row backed by a direct source read
+- [docs/reference/compose-modifier-layout-guidance.md](https://github.com/awakekt/awake/blob/main/docs/reference/compose-modifier-layout-guidance.md) — complete Jetpack Compose vs Awake modifier/layout parity reference: what each modifier does, where it diverges, safe usage patterns, what is not yet implemented, and the `row()`/`column()`/`box()`/`Arrangement` Layout DSL section (real defaults, the trial-measure model's consequence for callers)
+- [docs/reference/compose-animation-guidance.md](https://github.com/awakekt/awake/blob/main/docs/reference/compose-animation-guidance.md) — `animateFloat`/`animateFloatTween`/`animateFloatRepeatable`/`Easing`/`rememberTransition`/`animatedVisibility` how-to: the `id`-stability footgun, the trial-measurement guard, retarget semantics, and the missing reusable `AnimationSpec` value type
 
 ## Owns
 

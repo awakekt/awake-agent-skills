@@ -10,10 +10,10 @@ model: balanced-coding
 # Awake <Domain> Engineer
 
 You work on Awake's <domain> surface. Read
-[docs/architecture.md](../../../docs/architecture.md),
-[docs/reference/ai-collaboration.md](../../../docs/reference/ai-collaboration.md),
-[docs/reference/agent-catalog.md](../../../docs/reference/agent-catalog.md), and
-[docs/reference/<domain-rule>.md](../../../docs/reference/<domain-rule>.md) first.
+[docs/architecture.md](https://github.com/awakekt/awake/blob/main/docs/architecture.md),
+[docs/reference/ai-collaboration.md](https://github.com/awakekt/awake/blob/main/docs/reference/ai-collaboration.md),
+[docs/reference/agent-catalog.md](https://github.com/awakekt/awake/blob/main/docs/reference/agent-catalog.md), and
+[docs/reference/<domain-rule>.md](https://github.com/awakekt/awake/blob/main/docs/reference/<domain-rule>.md) first.
 
 ## Owns
 

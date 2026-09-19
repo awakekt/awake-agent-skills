@@ -13,19 +13,19 @@ model: claude-sonnet-5
 You work on Awake's application runtime shell, game composition roots, and sample-level MVI state
 architectures.
 
-Read [docs/architecture.md](../../../docs/architecture.md), [docs/reference/ai-collaboration.md](../../../docs/reference/ai-collaboration.md), [docs/reference/game-structure.md](../../../docs/reference/game-structure.md), [skills/awake-app-composition/SKILL.md](../../awake-app-composition/SKILL.md), [skills/awake-state-management/SKILL.md](../../awake-state-management/SKILL.md), [docs/tasks/2026-08-25-scene-session-simplification-plan.md](../../../docs/tasks/2026-08-25-scene-session-simplification-plan.md),
-and [docs/mvp-plan.md](../../../docs/mvp-plan.md) first.
+Read [docs/architecture.md](https://github.com/awakekt/awake/blob/main/docs/architecture.md), [docs/reference/ai-collaboration.md](https://github.com/awakekt/awake/blob/main/docs/reference/ai-collaboration.md), [docs/reference/game-structure.md](https://github.com/awakekt/awake/blob/main/docs/reference/game-structure.md), [skills/awake-app-composition/SKILL.md](../../awake-app-composition/SKILL.md), [skills/awake-state-management/SKILL.md](../../awake-state-management/SKILL.md), [docs/tasks/2026-08-25-scene-session-simplification-plan.md](https://github.com/awakekt/awake/blob/main/docs/tasks/2026-08-25-scene-session-simplification-plan.md),
+and [docs/mvp-plan.md](https://github.com/awakekt/awake/blob/main/docs/mvp-plan.md) first.
 
 Sample shells (`samples:studio`, `samples:ui-showcase`) render UI through `shadcn*` recipes but
 still write `ui-headless` layout/state directly (`row`/`column`/`box`/`Modifier`/`remember*`, see
-[docs/reference/ui-ownership.md](../../../docs/reference/ui-ownership.md)'s "Consuming From A
+[docs/reference/ui-ownership.md](https://github.com/awakekt/awake/blob/main/docs/reference/ui-ownership.md)'s "Consuming From A
 Sample, Game, Or Tool" section). **Before writing `row {}`/`column {}`/`remember*` code in a
 sample**, read
-[docs/reference/compose-modifier-layout-guidance.md](../../../docs/reference/compose-modifier-layout-guidance.md)'
+[docs/reference/compose-modifier-layout-guidance.md](https://github.com/awakekt/awake/blob/main/docs/reference/compose-modifier-layout-guidance.md)'
 s
 Layout DSL section (content inside `row {}`/`column {}` can run more than once per frame — an
 unguarded side effect there is a real, silent bug) and
-[docs/reference/mirror-map.md](../../../docs/reference/mirror-map.md)'s State hooks section (a
+[docs/reference/mirror-map.md](https://github.com/awakekt/awake/blob/main/docs/reference/mirror-map.md)'s State hooks section (a
 `remember*` hook's `id` is its entire identity — a collision with another widget's `id` silently
 shares state, with no compile-time signal).
 

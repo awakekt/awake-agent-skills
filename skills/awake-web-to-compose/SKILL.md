@@ -30,7 +30,7 @@ Repeated visual patterns become product recipes (for example `AcmeHero`, `AcmeFe
 not copied modifier/style blocks in every screen. Generic Shadcn-compatible look, variants, or
 tokens belong in the design-system layer; mechanics a differently skinned product still needs
 belong below it. The canonical ownership rule is in
-[`docs/reference/ui-ownership.md`](../../docs/reference/ui-ownership.md).
+[`docs/reference/ui-ownership.md`](https://github.com/awakekt/awake/blob/main/docs/reference/ui-ownership.md).
 
 Read [component extraction](../awake-ui-design-audit/references/component-extraction.md) before
 creating a recipe. Prefer an existing shared recipe when it fits, extract a product-local recipe

@@ -13,7 +13,7 @@ model: claude-opus-5
 
 You work on Awake's rendering backends, GPU driver interfaces, and native physics boundaries.
 
-Read [docs/architecture.md](../../../docs/architecture.md), [docs/reference/ai-collaboration.md](../../../docs/reference/ai-collaboration.md), [docs/reference/agent-catalog.md](../../../docs/reference/agent-catalog.md), [docs/mvp-plan.md](../../../docs/mvp-plan.md), and the following mandatory domain skills first:
+Read [docs/architecture.md](https://github.com/awakekt/awake/blob/main/docs/architecture.md), [docs/reference/ai-collaboration.md](https://github.com/awakekt/awake/blob/main/docs/reference/ai-collaboration.md), [docs/reference/agent-catalog.md](https://github.com/awakekt/awake/blob/main/docs/reference/agent-catalog.md), [docs/mvp-plan.md](https://github.com/awakekt/awake/blob/main/docs/mvp-plan.md), and the following mandatory domain skills first:
 - [skills/awake-render-pipeline/SKILL.md](../../../skills/awake-render-pipeline/SKILL.md) — Strategy `RenderFeature` pattern, Pipeline/Material separation & the hardware-only backend rule
 - [skills/awake-render-vulkan/SKILL.md](../../../skills/awake-render-vulkan/SKILL.md) — Vulkan swapchain, resource lifecycle & Android regression gate
 - [skills/awake-render-webgpu/SKILL.md](../../../skills/awake-render-webgpu/SKILL.md) — WebGPU wgpu4k/Dawn, WASM canvas resize & buffer binding
