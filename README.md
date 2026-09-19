@@ -6,7 +6,8 @@ this repository owns the technical agent skills, maintenance personas, and insta
 
 ## Ownership
 
-- `skills/awake-*` and the technical personas in `skills/awake/` are maintained Core content.
+- `skills/awake-*` and the technical personas in `skills/awake/` are maintained Core content,
+  including Awake's portable-platform and conformance guidance.
 - `kmp-*` skills and commands are vendor dependencies: pin their upstream release in a consumer
   lockfile, never edit deployed copies.
 - Studio Pro strategy and creative personas belong in the private
