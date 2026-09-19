@@ -50,7 +50,9 @@ def cache_source(project: Path, entry: dict) -> Path:
         run("git", "clone", "--no-checkout", entry["repository"], str(cache))
     if run("git", "rev-parse", "HEAD", cwd=cache) != entry["commit"]:
         run("git", "fetch", "--tags", "origin", entry["commit"], cwd=cache)
-        run("git", "checkout", "--detach", entry["commit"], cwd=cache)
+    # `git clone --no-checkout` may already have the requested HEAD but intentionally leaves the
+    # working tree empty. Checkout is therefore required even when the revision already matches.
+    run("git", "checkout", "--detach", entry["commit"], cwd=cache)
     if run("git", "rev-parse", "HEAD", cwd=cache) != entry["commit"]:
         raise ValueError(f"{entry['id']}: checkout did not resolve the pinned commit")
     archive = subprocess.check_output(["git", "archive", "--format=tar", entry["commit"]], cwd=cache)
