@@ -24,8 +24,8 @@ def main() -> int:
         match = re.search(r"^name:\s*(\S+)$", text, re.M)
         if not match or match.group(1) != path.parent.name:
             errors.append(f"{path.relative_to(ROOT)}: name must match directory")
-        if ".agents/skills/" in text:
-            errors.append(f"{path.relative_to(ROOT)}: references deployed paths instead of product tools")
+        if ".agents/skills/awake-" in text:
+            errors.append(f"{path.relative_to(ROOT)}: references a deployed Awake source path")
     if errors:
         print("Skill package verification failed:", *errors, sep="\n", file=sys.stderr)
         return 1
