@@ -606,14 +606,14 @@ container and every measured child; portal fixtures also require a real trigger/
 uses the same IDs in its semantic tree. Declare their horizontal/vertical gaps or trigger-to-
 surface offsets in `tools/shadcn/shadcn_parity_manifest.json`. The manifest is an
 explicit correspondence contract, not a request to auto-match elements by label or position.
-Use `skills/awake/commands/verify-ui-parity.md` for the complete registration workflow.
+Use the installed `awake` bundle's `verify-ui-parity` command for the complete registration workflow.
 
 ## Component-level cropping
 
 When a showcase page contains several widgets, do not manually crop before/after screenshots.
 The shadcn reference side is already component-cropped by Playwright through
 `tools/shadcn/capture_shadcn_local.py`. For the Awake side, use
-`skills/awake-ui-verification/scripts/compare_component_crops.py`: it resolves a semantic node ID from the generated preview
+`tools/shadcn/compare_component_crops.py`: it resolves a semantic node ID from the generated preview
 JSON, applies the preview raster scale and optional logical padding, writes the crop and a
 heatmap, and records JSON metrics. `tools/shadcn/shadcn_parity_manifest.json` is the single
 source of truth for cases; the legacy `ui_component_parity_cases.json` duplicate has been

@@ -1,11 +1,11 @@
 # Awake Repo-Local Skills
 
-This folder contains Awake's tracked repo-local skill and agent files.
+This folder contains Awake's public technical skill and agent files.
 
 ## What Lives Here
 
 - `agents/*.md`
-  - Dual-suite agent definitions: **Engine Framework Suite** (core, render, UI, runtime, platform, auditor) and **Game Studio Creative Suite** (producer, game designer, narrative, camera, art/VFX, audio)
+  - Engine Framework Suite definitions: core, render, UI, runtime, platform, auditor, and documentation
 - `commands/*.md`
   - Repo-local operational commands such as audits, review helpers, and semantic UI crop/diff workflows
 - `templates/*.md`
@@ -43,6 +43,4 @@ See `docs/reference/agent-catalog.md` for provider mappings.
 
 - `docs/*` is the source of truth
 - `skills/*` is execution guidance
-- `.claude/agents` and `.claude/commands/awake` are symlinks into this folder
-
-Edit the tracked files here, not the symlinked `.claude/` paths.
+Install this bundle into a consumer checkout; do not edit its deployed `.agents` copy.

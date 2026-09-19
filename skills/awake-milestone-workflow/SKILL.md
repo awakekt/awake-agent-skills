@@ -27,7 +27,7 @@ This skill defines the operational boundary between **GitHub Milestones & Issues
 | 📋 To-do items, progress checklists, & burndown | 📐 **Hardware Abstraction Layer (HAL) & Render contracts** |
 | 🐛 Bug reports, triage, & fixes | 📖 **API Guides, tutorials, & setup references** |
 | 💬 Design discussions before code lands | 📜 **Official release `CHANGELOG.md`** (frozen at release) |
-| ⏱️ Ephemeral task lists & assignment | 🤖 **AI Agent Rules & Skills (`.agents/skills/`)** |
+| ⏱️ Ephemeral task lists & assignment | 🤖 **Pinned AI agent skill releases** |
 
 ---
 

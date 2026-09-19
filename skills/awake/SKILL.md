@@ -1,11 +1,9 @@
 ---
 name: awake
 description: >
-  Repo-local skill bundle for the Awake KMP game engine and game studio. Contains role-specific
-  execution guidance across the Engine Framework Suite (core, render, UI, runtime, platform, auditor) and
-  the Game Studio Creative Suite (producer, game designer, narrative, camera, art/VFX, audio) under agents/,
-  operational commands under commands/, and starter templates under templates/. Use this skill to locate
-  the right domain-specific agent persona or command for Awake tasks.
+  Public execution guidance for technical Awake engine maintenance. Contains core, render, UI, runtime,
+  platform, and documentation personas plus review commands and templates. Studio Pro and creative personas
+  are supplied only by the private studio overlay.
 ---
 
 # Awake Repo-Local Skills
@@ -13,16 +11,15 @@ description: >
 See [README.md](README.md) for the full breakdown of what lives here, what doesn't,
 agent naming conventions, and the agent model-tier field.
 
-- `agents/*.md` — role-specific execution guidance for Awake's Engine Framework Suite and Game Studio Creative Suite
+- `agents/*.md` — role-specific execution guidance for Awake's public Engine Framework Suite
 - `commands/*.md` — repo-local operational commands (audits, review helpers)
 - `templates/*.md` — starter templates for new repo-local agent docs
 
-Canonical architecture policy and module ownership rules live in `docs/*`, not here —
-this is execution guidance, not the source of truth. `.claude/agents` and
-`.claude/commands/awake` are symlinks into this folder; edit the tracked files here.
+Canonical architecture policy and module ownership rules live in the Awake checkout's `docs/*`, not here.
+This is execution guidance, not the source of truth.
 
 ## Release Execution Policy
-See [Awake Release Process & Branching Guidelines](file:///Users/ronvaldoz/StudioProjects/awaken/docs/release-process.md) for the complete branching, versioning, and changelog rules.
+See the Awake checkout's `docs/release-process.md` for complete branching, versioning, and changelog rules.
 To cut a release, run:
 ```bash
 ./scripts/release.py cut [--channel dev|alpha|beta|rc|stable]

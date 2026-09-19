@@ -8,7 +8,7 @@ too broad to diagnose a component or layout regression.
 Prefer a manifest path in `$ARGUMENTS`:
 
 ```bash
-python3 skills/awake-ui-verification/scripts/compare_component_crops.py \
+python3 tools/shadcn/compare_component_crops.py \
   --manifest tools/shadcn/shadcn_parity_manifest.json
 ```
 
@@ -16,7 +16,7 @@ For one case, provide the Awake preview PNG, its generated semantic JSON, one or
 node IDs, and the matching component-cropped PNG from `tools/shadcn/capture_shadcn_local.py`:
 
 ```bash
-python3 skills/awake-ui-verification/scripts/compare_component_crops.py \
+python3 tools/shadcn/compare_component_crops.py \
   --awake-png samples/ui-showcase/build/ui-previews/<preview-id>.png \
   --semantic-json samples/ui-showcase/build/ui-previews/<preview-id>.json \
   --node-id <component-node-id> \
