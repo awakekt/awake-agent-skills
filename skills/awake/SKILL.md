@@ -1,26 +1,14 @@
 ---
 name: awake
-description: >
-  Public execution guidance for technical Awake engine maintenance. Contains core, render, UI, runtime,
-  platform, and documentation personas plus review commands and templates. Studio Pro and creative personas
-  are supplied only by the private studio overlay.
+description: Route technical Awake engine maintenance to the right domain skill or maintainer persona. Use for Awake implementation, review, documentation, and contributor workflows; Studio Pro strategy and creative work belong to the private Studio bundle.
 ---
 
-# Awake Repo-Local Skills
+# Awake Maintainer Routing
 
-See [README.md](README.md) for the full breakdown of what lives here, what doesn't,
-agent naming conventions, and the agent model-tier field.
+Select a domain skill for implementation work or an Awake persona in [agents/](agents/) for a
+cross-cutting maintainer role. The [public agent catalog](https://github.com/awakekt/awake-agent-skills/blob/main/docs/agent-catalog.md)
+lists persona ownership and routing.
 
-- `agents/*.md` — role-specific execution guidance for Awake's public Engine Framework Suite
-- `commands/*.md` — repo-local operational commands (audits, review helpers)
-- `templates/*.md` — starter templates for new repo-local agent docs
-
-Canonical architecture policy and module ownership rules live in the Awake checkout's `docs/*`, not here.
-This is execution guidance, not the source of truth.
-
-## Release Execution Policy
-See the Awake checkout's `docs/release-process.md` for complete branching, versioning, and changelog rules.
-To cut a release, run:
-```bash
-./scripts/release.py cut [--channel dev|alpha|beta|rc|stable]
-```
+Awake architecture policy lives in the Awake repository's docs; this bundle supplies
+task-specific execution guidance. Studio Pro strategy and creative personas are distributed
+separately in the private Studio bundle.
