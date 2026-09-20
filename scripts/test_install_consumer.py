@@ -63,8 +63,10 @@ class TestInstaller:
                     'license = "Apache-2.0"',
                     'skill_root = "skills"',
                     'skills = ["example"]',
+                    'skills_target = ".agents/skills"',
                     'command_root = "commands"',
                     'commands = ["example.md"]',
+                    'commands_target = ".agents/commands"',
                     "",
                 ]
             ),

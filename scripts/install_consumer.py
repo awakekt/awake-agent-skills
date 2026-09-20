@@ -21,6 +21,8 @@ from pathlib import Path
 COMMIT = re.compile(r"^[0-9a-f]{40}$")
 DIGEST = re.compile(r"^[0-9a-f]{64}$")
 KINDS = {"vendor", "maintained-core", "maintained-studio"}
+SKILL_TARGET = ".agents/skills"
+COMMAND_TARGET = ".agents/commands"
 
 
 def run(*args: str, cwd: Path | None = None) -> str:
@@ -33,13 +35,17 @@ def load_lock(path: Path) -> list[dict]:
         raise ValueError("lockfile must declare version = 1 and one or more [[source]] entries")
     entries = data["source"]
     for entry in entries:
-        required = ("id", "kind", "source", "tag", "commit", "archive_sha256", "skill_root", "skills")
+        required = ("id", "kind", "source", "tag", "commit", "archive_sha256", "skill_root", "skills", "skills_target")
         if any(not entry.get(key) for key in required):
             raise ValueError(f"source {entry.get('id', '<unknown>')} is missing a required field")
         if entry["kind"] not in KINDS or not COMMIT.fullmatch(entry["commit"]) or not DIGEST.fullmatch(entry["archive_sha256"]):
             raise ValueError(f"source {entry['id']} has invalid kind, commit, or archive digest")
         if entry["kind"] == "maintained-studio" and not entry.get("private", False):
             raise ValueError("maintained-studio entries must explicitly declare private = true")
+        if entry["skills_target"] != SKILL_TARGET:
+            raise ValueError(f"source {entry['id']}: skills must deploy to {SKILL_TARGET}")
+        if entry.get("commands") and entry.get("commands_target") != COMMAND_TARGET:
+            raise ValueError(f"source {entry['id']}: commands must deploy to {COMMAND_TARGET}")
     return entries
 
 
@@ -91,10 +97,10 @@ def deploy(source: Path, destination: Path, names: list[str]) -> None:
 def install(project: Path, lock: Path) -> None:
     for entry in load_lock(lock):
         cache = cache_source(project, entry)
-        deploy(cache / entry["skill_root"], project / ".agents" / "skills", entry["skills"])
+        deploy(cache / entry["skill_root"], project / entry["skills_target"], entry["skills"])
         commands = entry.get("commands", [])
         if commands:
-            deploy(cache / entry.get("command_root", "commands"), project / ".agents" / "commands", commands)
+            deploy(cache / entry.get("command_root", "commands"), project / entry["commands_target"], commands)
 
 
 def main() -> int:
