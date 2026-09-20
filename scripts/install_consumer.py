@@ -58,6 +58,9 @@ def cache_source(project: Path, entry: dict) -> Path:
     run("git", "checkout", "--detach", entry["commit"], cwd=cache)
     if run("git", "rev-parse", "HEAD", cwd=cache) != entry["commit"]:
         raise ValueError(f"{entry['id']}: checkout did not resolve the pinned commit")
+    tag_commit = run("git", "rev-list", "-n", "1", entry["tag"], cwd=cache)
+    if tag_commit != entry["commit"]:
+        raise ValueError(f"{entry['id']}: tag does not resolve to the pinned commit")
     archive = subprocess.check_output(["git", "archive", "--format=tar", entry["commit"]], cwd=cache)
     if hashlib.sha256(archive).hexdigest() != entry["archive_sha256"]:
         raise ValueError(f"{entry['id']}: archive digest does not match lockfile")

@@ -37,14 +37,17 @@ class TestInstaller:
         run("git", "add", ".", cwd=self.source)
         run("git", "commit", "--quiet", "-m", "fixture", cwd=self.source)
         self.commit = run("git", "rev-parse", "HEAD", cwd=self.source)
+        run("git", "tag", "-a", "v0.0.0", "-m", "fixture", cwd=self.source)
         archive = subprocess.check_output(["git", "archive", "--format=tar", self.commit], cwd=self.source)
         self.digest = hashlib.sha256(archive).hexdigest()
+        run("git", "commit", "--quiet", "--allow-empty", "-m", "follow-up", cwd=self.source)
+        run("git", "tag", "-a", "v0.0.1", "-m", "follow-up", cwd=self.source)
         self.consumer.mkdir()
 
     def teardown_method(self, method: object) -> None:
         self.tempdir.cleanup()
 
-    def lock(self, *, commit: str | None = None, digest: str | None = None) -> Path:
+    def lock(self, *, tag: str = "v0.0.0", commit: str | None = None, digest: str | None = None) -> Path:
         lock = self.consumer / "skills.lock.toml"
         lock.write_text(
             "\n".join(
@@ -54,7 +57,7 @@ class TestInstaller:
                     'id = "fixture"',
                     'kind = "maintained-core"',
                     f'source = "{self.source}"',
-                    'tag = "v0.0.0"',
+                    f'tag = "{tag}"',
                     f'commit = "{commit or self.commit}"',
                     f'archive_sha256 = "{digest or self.digest}"',
                     'license = "Apache-2.0"',
@@ -81,6 +84,14 @@ class TestInstaller:
             assert "archive digest" in str(error)
         else:
             raise AssertionError("installer accepted a wrong archive digest")
+
+    def test_rejects_tag_for_a_different_commit(self) -> None:
+        try:
+            installer.install(self.consumer, self.lock(tag="v0.0.1"))
+        except ValueError as error:
+            assert "tag does not resolve" in str(error)
+        else:
+            raise AssertionError("installer accepted a tag for a different commit")
 
     def test_rejects_wrong_commit(self) -> None:
         try:
