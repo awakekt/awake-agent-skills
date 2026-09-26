@@ -20,7 +20,15 @@ let it verify and materialize the exact lockfile revision:
     python3 .agents/vendor/awake-agent-skills-bootstrap/scripts/install_consumer.py --project .
 
 The installer caches immutable source checkouts under .agents/vendor/ and deploys only declared
-skills and commands into the agent-visible directories.
+skills and commands into the agent-visible directories: .agents/skills and .agents/commands, mirrored
+into .claude/skills and .claude/commands for Claude Code. Consumers keep all four gitignored.
+
+Re-running the installer is safe. It changes nothing when every deployment already matches the
+lockfile, relinks entries after a lockfile bump, and removes entries it created for skills that
+were dropped from the lockfile. It refuses to replace a directory it did not create.
+
+    install_consumer.py --project . --check   # report drift, exit 1 when an install is needed
+    install_consumer.py --project . --force   # re-verify pinned sources even when current
 
 ## Validation
 

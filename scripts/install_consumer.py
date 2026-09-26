@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import argparse
+import filecmp
 import hashlib
 import os
 import re
@@ -23,6 +24,9 @@ DIGEST = re.compile(r"^[0-9a-f]{64}$")
 KINDS = {"vendor", "maintained-core", "maintained-studio"}
 SKILL_TARGET = ".agents/skills"
 COMMAND_TARGET = ".agents/commands"
+# Agents that do not read .agents/ receive the same deployment in their own project directory.
+MIRRORS = {SKILL_TARGET: (".claude/skills",), COMMAND_TARGET: (".claude/commands",)}
+MARKER = ".agent-source"
 
 
 def run(*args: str, cwd: Path | None = None) -> str:
@@ -49,8 +53,12 @@ def load_lock(path: Path) -> list[dict]:
     return entries
 
 
+def cache_path(project: Path, entry: dict) -> Path:
+    return project / ".agents" / "vendor" / f"{entry['id']}@{entry['commit']}"
+
+
 def cache_source(project: Path, entry: dict) -> Path:
-    cache = project / ".agents" / "vendor" / f"{entry['id']}@{entry['commit']}"
+    cache = cache_path(project, entry)
     if not cache.exists():
         cache.parent.mkdir(parents=True, exist_ok=True)
         run("git", "clone", "--no-checkout", entry["source"], str(cache))
@@ -61,7 +69,7 @@ def cache_source(project: Path, entry: dict) -> Path:
         run("git", "fetch", "--tags", "origin", entry["commit"], cwd=cache)
     # `git clone --no-checkout` may already have the requested HEAD but intentionally leaves the
     # working tree empty. Checkout is therefore required even when the revision already matches.
-    run("git", "checkout", "--detach", entry["commit"], cwd=cache)
+    run("git", "checkout", "--quiet", "--detach", entry["commit"], cwd=cache)
     if run("git", "rev-parse", "HEAD", cwd=cache) != entry["commit"]:
         raise ValueError(f"{entry['id']}: checkout did not resolve the pinned commit")
     tag_commit = run("git", "rev-list", "-n", "1", entry["tag"], cwd=cache)
@@ -73,6 +81,74 @@ def cache_source(project: Path, entry: dict) -> Path:
     return cache
 
 
+def deployments(project: Path, entry: dict) -> list[tuple[Path, Path, list[str]]]:
+    """Every (source, destination, names) an entry deploys, agent mirrors included."""
+    cache = cache_path(project, entry)
+    result = [
+        (cache / entry["skill_root"], project / target, entry["skills"])
+        for target in (SKILL_TARGET, *MIRRORS[SKILL_TARGET])
+    ]
+    if entry.get("commands"):
+        result += [
+            (cache / entry.get("command_root", "commands"), project / target, entry["commands"])
+            for target in (COMMAND_TARGET, *MIRRORS[COMMAND_TARGET])
+        ]
+    return result
+
+
+def installed_origin(target: Path) -> Path | None:
+    """The source an installer-created entry points at, or None for anything else."""
+    if target.is_symlink():
+        return Path(os.readlink(target))
+    marker = target / MARKER
+    if target.is_dir() and marker.is_file():
+        return Path(marker.read_text(encoding="utf-8").strip())
+    return None
+
+
+def state(origin: Path, target: Path) -> str:
+    if not target.exists() and not target.is_symlink():
+        return "missing"
+    if target.is_file() and not target.is_symlink():
+        # The copy fallback for command files keeps no provenance, so content decides.
+        return "ok" if origin.is_file() and filecmp.cmp(origin, target, shallow=False) else "outdated"
+    installed = installed_origin(target)
+    if installed is None:
+        return "unmanaged"
+    return "ok" if installed == origin and origin.exists() else "outdated"
+
+
+def status(project: Path, entries: list[dict]) -> list[tuple[str, Path]]:
+    """Every deployed path that differs from the lockfile, as (state, path)."""
+    problems: list[tuple[str, Path]] = []
+    declared: dict[Path, set[str]] = {}
+    for entry in entries:
+        for source, destination, names in deployments(project, entry):
+            declared.setdefault(destination, set()).update(names)
+            for name in names:
+                current = state(source / name, destination / name)
+                if current != "ok":
+                    problems.append((current, destination / name))
+    vendor = project / ".agents" / "vendor"
+    for target in (SKILL_TARGET, *MIRRORS[SKILL_TARGET], COMMAND_TARGET, *MIRRORS[COMMAND_TARGET]):
+        destination = project / target
+        if not destination.is_dir():
+            continue
+        names = declared.get(destination, set())
+        for child in sorted(destination.iterdir()):
+            origin = installed_origin(child)
+            if child.name not in names and origin is not None and origin.is_relative_to(vendor):
+                problems.append(("stale", child))
+    return problems
+
+
+def remove(target: Path) -> None:
+    if target.is_symlink() or target.is_file():
+        target.unlink()
+    elif target.exists():
+        shutil.rmtree(target)
+
+
 def deploy(source: Path, destination: Path, names: list[str]) -> None:
     destination.mkdir(parents=True, exist_ok=True)
     for name in names:
@@ -80,41 +156,64 @@ def deploy(source: Path, destination: Path, names: list[str]) -> None:
         target = destination / name
         if not origin.exists():
             raise ValueError(f"declared source is missing: {origin}")
-        if target.is_symlink() or target.is_file():
-            target.unlink()
-        elif target.exists():
-            shutil.rmtree(target)
+        if state(origin, target) == "ok":
+            continue
+        remove(target)
         try:
             target.symlink_to(origin)
         except OSError:
             if origin.is_dir():
                 shutil.copytree(origin, target)
-                (target / ".agent-source").write_text(str(origin) + "\n", encoding="utf-8")
+                (target / MARKER).write_text(str(origin) + "\n", encoding="utf-8")
             else:
                 shutil.copy2(origin, target)
 
 
-def install(project: Path, lock: Path) -> None:
-    for entry in load_lock(lock):
-        cache = cache_source(project, entry)
-        deploy(cache / entry["skill_root"], project / entry["skills_target"], entry["skills"])
-        commands = entry.get("commands", [])
-        if commands:
-            deploy(cache / entry.get("command_root", "commands"), project / entry["commands_target"], commands)
+def install(project: Path, lock: Path, *, force: bool = False) -> list[tuple[str, Path]]:
+    """Bring every deployment in line with the lockfile and return what changed."""
+    entries = load_lock(lock)
+    problems = status(project, entries)
+    conflicts = [str(path) for current, path in problems if current == "unmanaged"]
+    if conflicts:
+        raise ValueError("refusing to replace entries the installer did not create: " + ", ".join(conflicts))
+    if not problems and not force:
+        return []
+    for entry in entries:
+        cache_source(project, entry)
+        for source, destination, names in deployments(project, entry):
+            deploy(source, destination, names)
+    for current, path in problems:
+        if current == "stale":
+            remove(path)
+    return problems
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--project", default=".")
     parser.add_argument("--lock", default=".agents/skills.lock.toml")
+    parser.add_argument("--check", action="store_true", help="report drift without changing anything; exit 1 if an install is needed")
+    parser.add_argument("--force", action="store_true", help="re-verify pinned sources even when every deployment is current")
     args = parser.parse_args()
     project = Path(args.project).resolve()
     try:
-        install(project, project / args.lock)
+        if args.check:
+            problems = status(project, load_lock(project / args.lock))
+        else:
+            problems = install(project, project / args.lock, force=args.force)
     except (OSError, ValueError, subprocess.CalledProcessError, tomllib.TOMLDecodeError) as error:
         print(f"agent skill installation failed: {error}", file=sys.stderr)
         return 1
-    print("agent skill installation complete")
+    for current, path in problems:
+        action = current if args.check else ("removed" if current == "stale" else "installed")
+        print(f"{action:9} {path.relative_to(project)}")
+    if not problems:
+        print("agent skills are up to date")
+    elif args.check:
+        print(f"agent skills need an install: {len(problems)} entries differ from the lockfile")
+        return 1
+    else:
+        print(f"agent skill installation complete: {len(problems)} entries updated")
     return 0
 
 
