@@ -3,7 +3,7 @@ name: awake-framework-boundary
 description: Decide whether a proposed capability belongs in the Awake framework or in a consuming game repository. Use before adding an engine module, promoting sample code, or introducing networking, persistence, server, or MMO-oriented abstractions.
 metadata:
   author: awake
-  last-updated: '2026-08-20'
+  last-updated: '2026-09-28'
 ---
 
 ## The Three-Layer Ecosystem Architecture
@@ -32,7 +32,23 @@ Awake enforces strict boundaries across three distinct architectural layers:
    consumer/private pack. Awake may supply neutral terrain data and extension seams, never the
    authored world policy.
 
-Use `awake-architecture-auditor` for the decision. Use implementation skills only after it.
+Use `awake-architecture-auditor` (`skills/awake/agents/awake-architecture-auditor.md`) for the
+decision; where that persona is not installed, apply these rules directly and record rule 5 in the
+PR. Use implementation skills only after it.
+
+## Where a Capability Lives
+
+| Capability | Home | Examples |
+|---|---|---|
+| Anything a shipped game needs at runtime, when it is neutral engine capability | Awake Core (`awaken`, Apache 2.0, Maven Central) | Texture/UV animation on a material, a surface-shader provider seam, scene depth and time inputs, terrain data, navigation |
+| Authored world policy and game rules | The consuming game or content pack | A water look, biomes, vegetation, prop placement, importers for a legacy format |
+| Authoring productivity, team and cloud workflows | Studio Pro (`awake-pro`, commercial) | Visual node editors, generators, river/lake and flow-painting tools. Placement is scored by the private `studio-capability-scoring` skill. |
+| Public starting point for a new game | `awake-template` | Build setup and a minimal scene |
+
+- Runtime is never commercial: whatever a Studio scene uses must run from Awake Core or the
+  game's own code, and a Pro tool emits data that runtime reads. A capability moves from a pack
+  to Core only by rules 2 and 5. Neither Core nor its editor contract depends on Studio Pro.
+- There is no separate "starter kits" repository; it was retired unused. Do not route there.
 
 ## What Belongs in `awake:scene:*` (The Scene-Binding Boundary)
 
