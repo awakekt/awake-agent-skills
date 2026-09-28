@@ -30,10 +30,22 @@ were dropped from the lockfile. It refuses to replace a directory it did not cre
     install_consumer.py --project . --check   # report drift, exit 1 when an install is needed
     install_consumer.py --project . --force   # re-verify pinned sources even when current
 
+## Keeping pins current
+
+`bump_lock.py` moves every source in a consumer lockfile to its newest stable `vX.Y.Z` tag and
+writes the commit and archive digest the installer verifies. A maintained bundle's skill and
+command lists follow the release; a vendor keeps its curated selection, drops names the release no
+longer ships, and reports new ones for review. Run it from a scheduled job that opens a pull
+request, so pins still move through review:
+
+    python3 .agents/vendor/awake-agent-skills-bootstrap/scripts/bump_lock.py --project . --summary bump.md
+
+It exits 1 when a source could not be checked, after moving the ones it could.
+
 ## Validation
 
 Run the package verifier and Agent Skills reference validator for every skill directory:
 
     python3 scripts/verify_bundle.py
     for skill in skills/*; do [ ! -f "$skill/SKILL.md" ] || uvx --from skills-ref agentskills validate "$skill"; done
-    pytest scripts/test_install_consumer.py
+    pytest scripts/test_install_consumer.py scripts/test_bump_lock.py
