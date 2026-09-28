@@ -20,6 +20,7 @@ capability needed is in the repo:
 | Does the frame the app PRESENTS render right? | `HeadlessSurface` + `Renderer.draw` + `readPresentedPixels` |
 | Does the app's own plan render right? | `VulkanEngine(lifecycle, plan).createBackendResources(HeadlessSurface(w, h))` |
 | Does the app's scene wiring render right? | the above, plus `SceneLoader.instantiate` and `RenderSystem.update` |
+| What did a shader compute -- normal, depth, shadow, albedo, terrain layers? | a [debug view](../awake-render-debug-views/SKILL.md) of any of the above |
 
 Worked examples: `ShowcasePlanFrameTest` (all four layers) and
 `RendererHeadlessCascadedShadowTest` (probe scenes).

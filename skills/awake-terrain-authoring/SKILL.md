@@ -29,6 +29,7 @@ Awake provides two complementary "cousin" paradigms for rendering terrains at sc
 
 - Multi-layer ground blending uses `TerrainSplatWeightMap` (4-channel RGBA weights) in `awake:asset:terrain:splat`.
 - Rendered on the GPU using `PackShaderSets.TerrainSplat` (`AslTerrainSplatShader` in `awake:asset:shader-pack`) via a 4-layer `texture_2d_array` diffuse texture.
+- Check a layered surface with the `DominantLayer`, `LayerWeights` and `Lightmap` [debug views](../awake-render-debug-views/SKILL.md) before blaming import data or the shader.
 
 ## Ownership
 

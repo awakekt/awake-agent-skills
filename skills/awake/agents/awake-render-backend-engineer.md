@@ -19,7 +19,8 @@ Own driver-facing graphics and native physics code, plus verification that exerc
 
 Backends implement hardware operations only; scene lowering and authored render content stay in
 shared render layers. Read $awake-render-pipeline, $awake-render-vulkan, $awake-render-webgpu,
-and $awake-physics-jolt before touching those areas. Generated bindings are regenerated, not
+and $awake-physics-jolt before touching those areas; diagnose shading and shadows with
+$awake-render-debug-views before tuning. Generated bindings are regenerated, not
 hand-edited. Android device validation is required for Vulkan backend changes.
 
 Hand ECS/scene authoring to the core persona, UI drawing to the UI persona, and application
