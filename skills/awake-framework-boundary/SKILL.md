@@ -3,7 +3,7 @@ name: awake-framework-boundary
 description: Decide whether a proposed capability belongs in the Awake framework or in a consuming game repository. Use before adding an engine module, promoting sample code, or introducing networking, persistence, server, or MMO-oriented abstractions.
 metadata:
   author: awake
-  last-updated: '2026-08-20'
+  last-updated: '2026-09-28'
 ---
 
 ## The Three-Layer Ecosystem Architecture
@@ -32,7 +32,25 @@ Awake enforces strict boundaries across three distinct architectural layers:
    consumer/private pack. Awake may supply neutral terrain data and extension seams, never the
    authored world policy.
 
-Use `awake-architecture-auditor` for the decision. Use implementation skills only after it.
+Use `awake-architecture-auditor` (`skills/awake/agents/awake-architecture-auditor.md`) for the
+decision; where that persona is not installed, apply these rules directly and record rule 5 in the
+PR. Use implementation skills only after it.
+
+## Where a Capability Lives
+
+| Capability | Home | Examples |
+|---|---|---|
+| Neutral engine seam: no world or product vocabulary, generic across games | Awake Core (`awaken`, Apache 2.0, Maven Central) | Texture/UV animation on a material, a surface-shader provider seam, scene depth and time inputs, terrain data |
+| Authored world policy and game rules | The consuming game or content pack | A water look, biomes, vegetation, prop placement, importers for a legacy format |
+| Reusable commercial runtime kits a game ships with, and commercial authoring tools | Studio Pro (`awake-pro`, private, GitHub Packages) | Navigation, ragdoll, visual blueprints; river/lake and flow-painting tools. Layout is in the private `studio-*` skills. |
+| Public starting point for a new game | `awake-template` | Build setup and a minimal scene |
+
+- A capability moves from a pack to Core only by rules 2 and 5, and to Studio Pro only as a
+  product decision. Neither Core nor its editor contract depends on Studio Pro.
+- The runtime of anything a Studio scene uses must be available where the game ships: free in
+  Core, or a commercial runtime kit the game depends on. Authoring tools alone may be
+  editor-only.
+- There is no separate "starter kits" repository; it was retired unused. Do not route there.
 
 ## What Belongs in `awake:scene:*` (The Scene-Binding Boundary)
 
