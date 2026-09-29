@@ -33,6 +33,8 @@ class TestInstaller:
             (self.source / "skills" / skill / "SKILL.md").write_text(f"---\nname: {skill}\n---\n", encoding="utf-8")
         (self.source / "commands").mkdir()
         (self.source / "commands" / "example.md").write_text("# example\n", encoding="utf-8")
+        (self.source / "agents").mkdir()
+        (self.source / "agents" / "auditor.md").write_text("---\nname: auditor\n---\n", encoding="utf-8")
         run("git", "init", "--quiet", cwd=self.source)
         run("git", "config", "user.email", "test@example.invalid", cwd=self.source)
         run("git", "config", "user.name", "Test", cwd=self.source)
@@ -77,6 +79,9 @@ class TestInstaller:
                     'command_root = "commands"',
                     'commands = ["example.md"]',
                     'commands_target = ".agents/commands"',
+                    'agent_root = "agents"',
+                    'agents = ["auditor.md"]',
+                    'agents_target = ".agents/agents"',
                     "",
                 ]
             ),
@@ -89,12 +94,23 @@ class TestInstaller:
         for root in (".agents", ".claude"):
             assert (self.consumer / root / "skills" / "example" / "SKILL.md").is_file()
             assert (self.consumer / root / "commands" / "example.md").is_file()
+            assert (self.consumer / root / "agents" / "auditor.md").is_file()
+
+    def test_agents_must_deploy_to_the_agents_directory(self) -> None:
+        lock = self.lock()
+        lock.write_text(lock.read_text(encoding="utf-8").replace(".agents/agents", ".claude/agents"), encoding="utf-8")
+        try:
+            installer.load_lock(lock)
+        except ValueError as error:
+            assert "agents must deploy" in str(error)
+        else:
+            raise AssertionError("a lockfile deploying agents elsewhere must be refused")
 
     def test_status_reports_missing_until_installed(self) -> None:
         lock = self.lock()
         before = installer.status(self.consumer, installer.load_lock(lock))
         assert {state for state, _ in before} == {"missing"}
-        assert len(before) == 4
+        assert len(before) == 6  # skill, command and agent, each in .agents and .claude
         installer.install(self.consumer, lock)
         assert installer.status(self.consumer, installer.load_lock(lock)) == []
 
