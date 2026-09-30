@@ -20,8 +20,10 @@ let it verify and materialize the exact lockfile revision:
     python3 .agents/vendor/awake-agent-skills-bootstrap/scripts/install_consumer.py --project .
 
 The installer caches immutable source checkouts under .agents/vendor/ and deploys only declared
-skills and commands into the agent-visible directories: .agents/skills and .agents/commands, mirrored
-into .claude/skills and .claude/commands for Claude Code. Consumers keep all four gitignored.
+skills, commands and agent personas into the agent-visible directories: .agents/skills,
+.agents/commands and .agents/agents, mirrored into .claude/skills, .claude/commands and
+.claude/agents for Claude Code. A lockfile source lists personas with `agent_root`, `agents` and
+`agents_target = ".agents/agents"`. Consumers keep all six gitignored.
 
 Re-running the installer is safe. It changes nothing when every deployment already matches the
 lockfile, relinks entries after a lockfile bump, and removes entries it created for skills that
