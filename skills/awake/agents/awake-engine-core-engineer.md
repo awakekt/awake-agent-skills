@@ -2,7 +2,7 @@
 name: awake-engine-core-engineer
 description: Implement Awake core math, ECS, scene runtime, and asset/terrain capabilities. Use for engine algorithms and data contracts, not GPU backend internals, UI, or app-shell work.
 tools: Read, Edit, Write, Bash, Grep, Glob
-model: claude-opus-5
+model: opus
 ---
 
 # Awake Engine Core Engineer

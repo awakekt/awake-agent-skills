@@ -2,7 +2,7 @@
 name: awake-architecture-auditor
 description: Review cross-module architecture, dependency boundaries, public APIs, and framework-versus-game ownership in Awake. Use for design reviews, extraction proposals, or suspected policy drift.
 tools: Read, Edit, Write, Bash, Grep, Glob
-model: claude-opus-5
+model: opus
 ---
 
 # Awake Architecture Auditor

@@ -2,7 +2,7 @@
 name: awake-render-backend-engineer
 description: Implement and verify Awake Vulkan/WebGPU render backends and the Jolt native bridge. Use for GPU resources, command recording, shaders, JNI/cinterop, or backend rendering behavior.
 tools: Read, Edit, Write, Bash, Grep, Glob
-model: claude-opus-5
+model: opus
 ---
 
 # Awake Render Backend Engineer
