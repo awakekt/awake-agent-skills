@@ -1,6 +1,10 @@
 ---
 name: awake-platform-capability-design
 description: Design, extract and test a portable Awake Core capability (storage, paths, handles, codecs, asset sources, browser persistence), weakest platform first. Use before adding a Core contract, writing a codec, moving a capability between Studio and Core, or writing its conformance tests.
+license: Apache-2.0
+metadata:
+  author: awake
+  last-updated: '2026-10-03'
 ---
 
 # Awake platform capability design

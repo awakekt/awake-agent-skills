@@ -12,11 +12,11 @@ metadata:
 
 The Awake Engine ecosystem is structured into three strictly decoupled architectural layers:
 
-1. **Layer 1: Awake Core Engine (`awaken`)** (Apache 2.0):
+1. **Layer 1: Awake Core Engine (`awakekt/awake`)** (Apache 2.0):
    Runtime libraries required to compile, execute, and ship games on Desktop, iOS, Android, and WASM (`:awake:scene`, `:awake:physics`, `:awake:render`, `:awake:ui:shadcn`, `:awake:project`, etc.).
-2. **Layer 2: Awake Core Editor (`awaken:awake:editor:contract`)** (Apache 2.0):
+2. **Layer 2: Awake Core Editor (`awakekt/awake`, `:awake:editor:contract`)** (Apache 2.0):
    Public, vendor-neutral editor contracts, provider extension points, and project plugin metadata published under `com.awakekt:awake-editor-contract`. Allows third-party developers, community creators, and commercial tools to write plugins against an open-source standard.
-3. **Layer 3: Awake Studio Pro (`awake-pro`)** (Commercial):
+3. **Layer 3: Awake Studio Pro (`awakekt/awake-studio`)** (Commercial):
    Commercial desktop authoring application (`:app:studio`), visual inspectors, collaborative workflows, and the secure runtime loader (`StudioPluginPipeline`) that verifies signatures, checks permissions, and hosts plugins.
 
 ---
@@ -30,7 +30,7 @@ All public plugin interfaces live in `:awake:editor:contract`. They are vendor-n
 - **Publish Coordinates**: `com.awakekt:awake-editor-contract`
 
 ### Fundamental Rule: Zero Downward or Horizontal Leaks
-- `:awake:editor:contract` **must never** depend on `:app:studio` or any commercial plugin in `awake-pro`.
+- `:awake:editor:contract` **must never** depend on `:app:studio` or any commercial plugin in `awakekt/awake-studio`.
 - `:awake:editor:contract` only depends on Awake Core modules (`:awake:project`, `:awake:ecs`, etc.).
 - Third-party plugins compile strictly against `com.awakekt:awake-editor-contract`.
 

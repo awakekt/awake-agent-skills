@@ -5,6 +5,10 @@ description: >
   Read before touching Vulkan swapchain creation/resizing, GPU resource allocations, command recording,
   JNI bindings generator, or Android Vulkan verification. Trigger keywords - Vulkan, VkSwapchainKHR, VkDevice,
   VkImage, VkBuffer, vkCmdBindPipeline, vkQueueSubmit, VulkanView, Android Vulkan, MoltenVK, JNI bindings.
+license: Apache-2.0
+metadata:
+  author: awake
+  last-updated: '2026-09-20'
 ---
 
 # Vulkan Backend Engineering in Awake

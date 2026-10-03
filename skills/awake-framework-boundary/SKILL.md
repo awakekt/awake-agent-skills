@@ -1,20 +1,23 @@
 ---
 name: awake-framework-boundary
 description: Decide whether a proposed capability belongs in the Awake framework or in a consuming game repository. Use before adding any engine module, before moving code from Awake Studio, a sample or a template into Awake Core, before adding a gameplay system or a default tuning value, and before introducing networking, persistence, server, or MMO-oriented abstractions.
+license: Apache-2.0
 metadata:
   author: awake
   last-updated: '2026-09-29'
 ---
 
+# Awake Framework Boundary
+
 ## The Three-Layer Ecosystem Architecture
 
 Awake enforces strict boundaries across three distinct architectural layers:
 
-1. **Layer 1: Awake Core Engine (`awaken`)** (Apache 2.0):
+1. **Layer 1: Awake Core Engine (`awakekt/awake`)** (Apache 2.0):
    Runtime engine libraries required to compile, execute, and ship games on Desktop, iOS, Android, and WASM (`:awake:scene`, `:awake:physics`, `:awake:render`, `:awake:ui:shadcn`, `:awake:project`, etc.).
-2. **Layer 2: Awake Core Editor (`awaken:awake:editor:contract`)** (Apache 2.0):
+2. **Layer 2: Awake Core Editor (`awakekt/awake`, `:awake:editor:contract`)** (Apache 2.0):
    Public, vendor-neutral editor contracts and extension points (`com.awakekt:awake-editor-contract`). Enables any developer or toolmaker to author editor plugins without closed-source Studio dependencies.
-3. **Layer 3: Awake Studio Pro (`awake-pro`)** (Commercial):
+3. **Layer 3: Awake Studio Pro (`awakekt/awake-studio`)** (Commercial):
    Commercial desktop application (`:app:studio`), visual inspectors, collaborative workflows, and the secure runtime loader (`StudioPluginPipeline`).
 
 ## Framework vs Game Boundary Rules
@@ -51,9 +54,9 @@ PR. Use implementation skills only after it.
 
 | Capability | Home | Examples |
 |---|---|---|
-| Anything a shipped game needs at runtime, when it is neutral engine capability | Awake Core (`awaken`, Apache 2.0, Maven Central) | Texture/UV animation on a material, a surface-shader provider seam, scene depth and time inputs, terrain data, navigation |
+| Anything a shipped game needs at runtime, when it is neutral engine capability | Awake Core (`awakekt/awake`, Apache 2.0, Maven Central) | Texture/UV animation on a material, a surface-shader provider seam, scene depth and time inputs, terrain data, navigation |
 | Authored world policy and game rules | The consuming game or content pack | A water look, biomes, vegetation, prop placement, importers for a legacy format |
-| Authoring productivity, team and cloud workflows | Studio Pro (`awake-pro`, commercial) | Visual node editors, generators, river/lake and flow-painting tools. Placement is scored by the private `studio-capability-scoring` skill. |
+| Authoring productivity, team and cloud workflows | Studio Pro (`awakekt/awake-studio`, commercial) | Visual node editors, generators, river/lake and flow-painting tools. Placement is scored by the private `studio-capability-scoring` skill. |
 | Public starting point for a new game | `awake-template` | Build setup and a minimal scene |
 
 - Runtime is never commercial: whatever a Studio scene uses must run from Awake Core or the

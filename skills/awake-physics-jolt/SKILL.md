@@ -4,6 +4,10 @@ description: >
   Rules and invariants for Awake's physics system (`awake:physics:api` and `awake:backend:jolt` C++ bridge).
   Read before touching physics simulation steps, rigid bodies, colliders, contact listeners, raycasting, or ECS physics wiring.
   Trigger keywords - Jolt, physics, RigidBody, Collider, BoxShape, SphereShape, ContactListener, RayCast, PhysicsSystem.
+license: Apache-2.0
+metadata:
+  author: awake
+  last-updated: '2026-09-20'
 ---
 
 # Jolt Physics Backend Engineering in Awake
@@ -12,7 +16,7 @@ Awake's physics subsystem is partitioned into two clean layers:
 1. `:awake:physics:api` — the pure Kotlin, dependency-free physics contract (rigid bodies, shapes, queries, collision events).
 2. `:awake:backend:jolt` — the high-performance C++ JNI bridge to Jolt Physics.
 
-Read [docs/architecture.md](https://github.com/awakekt/awake/blob/main/docs/architecture.md), [docs/reference/game-structure.md](https://github.com/awakekt/awake/blob/main/docs/reference/game-structure.md), and [skills/awake-ecs-authoring/SKILL.md](../awake-ecs-authoring/SKILL.md) first.
+Read [docs/architecture.md](https://github.com/awakekt/awake/blob/main/docs/architecture.md), [docs/reference/game-structure.md](https://github.com/awakekt/awake/blob/main/docs/reference/game-structure.md), and [skills/awake-ecs-authoring/SKILL.md](https://github.com/awakekt/awake-game-agent-skills/blob/main/skills/awake-ecs-authoring/SKILL.md) first.
 
 ## 1. Clean Architecture Boundary
 

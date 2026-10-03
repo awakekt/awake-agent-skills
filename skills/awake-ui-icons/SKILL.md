@@ -1,6 +1,10 @@
 ---
 name: awake-ui-icons
 description: How icon vector data enters Awake - generated from SVG sources via tools/icons/svg_to_ui_image_vector.py, never hand-transcribed. Read before adding, editing, or deriving any ImageVector/icon path data. Trigger keywords - icon, UiImageVector, uiImageVector, HeroIcons, UiIcons, ShadcnIcons, SVG, path data, moveTo, cubicTo, chevron, glyph, vector.
+license: Apache-2.0
+metadata:
+  author: awake
+  last-updated: '2026-09-20'
 ---
 
 # Icon Authoring in Awake

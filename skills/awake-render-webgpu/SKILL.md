@@ -4,6 +4,10 @@ description: >
   Rules and invariants for Awake's WebGPU rendering backend (`awake:backend:webgpu` and wgpu4k/Dawn integration).
   Read before touching WebGPU pipelines, WGSL/SPIR-V shader bindings, WASM browser canvas resizing, or buffer upload paths.
   Trigger keywords - WebGPU, wgpu4k, Dawn, WGSL, GPUTexture, GPUBuffer, GPURenderPipeline, WASM canvas, canvas resize.
+license: Apache-2.0
+metadata:
+  author: awake
+  last-updated: '2026-09-20'
 ---
 
 # WebGPU Backend Engineering in Awake

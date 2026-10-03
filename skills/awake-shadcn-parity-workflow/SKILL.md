@@ -131,5 +131,5 @@ Record the reference source, the standalone test, the catalog-shell test, the pr
 remaining gaps. The next component starts only after these artifacts exist.
 
 Read [`awake-ui-verification`](../awake-ui-verification/SKILL.md) for evidence rules and
-[`awake-ui-layout-guidance`](../awake-ui-layout-guidance/SKILL.md) for fixed/adaptive sizing,
+[`awake-ui-layout-guidance`](https://github.com/awakekt/awake-game-agent-skills/blob/main/skills/awake-ui-layout-guidance/SKILL.md) for fixed/adaptive sizing,
 weight, spacing, and alignment decisions.

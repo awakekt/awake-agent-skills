@@ -8,7 +8,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: awake
-  last-updated: '2026-10-15'
+  last-updated: '2026-10-03'
   keywords: Awake, shadcn, tailwind, Tw.Spacing, h-9, parity, ui-designsystem, Style, ShadcnCard, ShadcnTable, HeroIcons, ShadcnIcons
 ---
 
