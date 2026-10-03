@@ -74,6 +74,20 @@ is coupled to it. In the case that produced those numbers, cascade SELECTION had
 depend on the normal offset, so changing the offset moved fragments between cascades instead of
 moving the lookup within one. No amount of tuning would have found that; reading the shader did.
 
+## Rule 7: a render fix ships the scenario that shows the bug
+
+The PR evidence workflow renders the fixed scenario list in
+`awake/engine/render/parity/src/desktopMain/kotlin/com/awakekt/awake/render/parity/RenderEvidence.kt`
+on the base and the head and comments only when a pixel differs. A fix whose case is not in that
+list gets `No render changed`, which reads as "nothing visible moved" when the bug was simply never
+rendered. Four render fixes merged that way in one day.
+
+- Before opening a `fix(render|scene|vulkan|webgpu)` PR, add (or extend) a scenario that draws the
+  bug: the base shows it, the head doesn't. Keep its file name stable; names are the comparison key.
+- Pair it with the asserting test from Rule 3; the scenario is evidence, the test is the guard.
+- If the case cannot be captured headless (device-only, a timing race), say so in the PR body and
+  link the issue for the missing harness.
+
 ## What to assert
 
 Assert properties of the frame, not exact pixels, and name the file a scene came from:
