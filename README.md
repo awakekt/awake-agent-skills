@@ -35,8 +35,8 @@ were dropped from the lockfile. It refuses to replace a directory it did not cre
 ## Keeping pins current
 
 `bump_lock.py` moves every source in a consumer lockfile to its newest stable `vX.Y.Z` tag and
-writes the commit and archive digest the installer verifies. A maintained bundle's skill and
-command lists follow the release; a vendor keeps its curated selection, drops names the release no
+writes the commit and archive digest the installer verifies. A maintained bundle's skill,
+command and persona lists follow the release; a vendor keeps its curated selection, drops names the release no
 longer ships, and reports new ones for review. Run it from a scheduled job that opens a pull
 request, so pins still move through review:
 

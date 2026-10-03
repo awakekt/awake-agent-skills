@@ -4,8 +4,8 @@
 """Move every source in a consumer lockfile to its newest release tag.
 
 Each moved source gets the commit and archive digest the installer verifies. A maintained bundle
-(maintained-core, maintained-studio) is consumed whole, so its skill and command lists follow the
-release; a vendor keeps its curated selection, losing only names the release no longer ships, and
+(maintained-core, maintained-studio) is consumed whole, so its skill, command and persona lists
+follow the release; a vendor keeps its curated selection, losing only names the release no longer ships, and
 reports new ones for a reviewer to adopt. Only stable `vX.Y.Z` tags count; pre-releases are skipped.
 """
 
@@ -53,6 +53,7 @@ class Release:
     digest: str
     skills: list[str]
     commands: list[str]
+    agents: list[str]
 
 
 def git(*args: str, cwd: Path | None = None) -> str:
@@ -79,15 +80,19 @@ def fetch_release(entry: dict, tag: str, workdir: Path) -> Release:
         for path in files
         if path.startswith(skill_root) and path.count("/") == skill_root.count("/") + 1 and path.endswith("/SKILL.md")
     )
-    command_root = entry.get("command_root", "commands").rstrip("/") + "/"
-    commands = sorted(
-        path[len(command_root):] for path in files if path.startswith(command_root) and "/" not in path[len(command_root):] and path.endswith(".md")
-    )
-    return Release(tag, commit, hashlib.sha256(archive).hexdigest(), skills, commands)
+    commands = top_level_markdown(files, entry.get("command_root", "commands"))
+    agents = top_level_markdown(files, entry.get("agent_root", "agents"))
+    return Release(tag, commit, hashlib.sha256(archive).hexdigest(), skills, commands, agents)
+
+
+def top_level_markdown(files: list[str], root: str) -> list[str]:
+    """The `.md` files directly under [root]: command and persona names."""
+    root = root.rstrip("/") + "/"
+    return sorted(path[len(root):] for path in files if path.startswith(root) and "/" not in path[len(root):] and path.endswith(".md"))
 
 
 def selection(entry: dict, key: str, released: list[str], report: Report) -> list[str]:
-    """What [entry] should declare for [key] ("skills" or "commands") after moving to [released]."""
+    """What [entry] should declare for [key] ("skills", "commands" or "agents") after moving to [released]."""
     declared = entry.get(key, [])
     if entry["kind"] in MIRRORED_KINDS:
         return released
@@ -110,12 +115,12 @@ def render_array(key: str, names: list[str]) -> str:
     return f"{key} = [\n" + "\n".join(lines) + "\n]"
 
 
-def rewrite(block: str, entry: dict, release: Release, skills: list[str], commands: list[str]) -> str:
+def rewrite(block: str, entry: dict, release: Release, lists: dict[str, list[str]]) -> str:
     """[block] with its pin and lists replaced, everything else (comments, order) kept."""
     for key, value in (("tag", release.tag), ("commit", release.commit), ("archive_sha256", release.digest)):
         block = re.sub(rf'^{key} = ".*"$', f'{key} = "{value}"', block, count=1, flags=re.MULTILINE)
     # An unchanged list keeps its hand wrapping, so the diff shows only what moved.
-    for key, names in (("skills", skills), ("commands", commands)):
+    for key, names in lists.items():
         if key in entry and names != entry[key]:
             block = re.sub(rf"^{key} = \[[^\]]*\]", lambda _: render_array(key, names), block, count=1, flags=re.MULTILINE)
     return block
@@ -142,8 +147,11 @@ def bump(lock: Path, report: Report) -> bool:
                 report.failed.append(f"`{entry['id']}`: {(error.stderr or str(error)).strip()}")
                 continue
             skills = selection(entry, "skills", release.skills, report)
-            commands = selection(entry, "commands", release.commands, report) if "commands" in entry else []
-            blocks[index] = rewrite(blocks[index], entry, release, skills, commands)
+            lists = {"skills": skills}
+            for key, released in (("commands", release.commands), ("agents", release.agents)):
+                if key in entry:
+                    lists[key] = selection(entry, key, released, report)
+            blocks[index] = rewrite(blocks[index], entry, release, lists)
             added = sorted(set(skills) - set(entry["skills"]))
             dropped = sorted(set(entry["skills"]) - set(skills))
             change = "; ".join(filter(None, [f"added {', '.join(added)}" if added else "", f"dropped {', '.join(dropped)}" if dropped else ""]))

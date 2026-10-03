@@ -41,6 +41,7 @@ class TestBump:
         self.write_skill("retired")
         (self.source / "commands").mkdir()
         (self.source / "commands" / "example.md").write_text("# example\n", encoding="utf-8")
+        self.write_agent("auditor")
         run("git", "init", "--quiet", cwd=self.source)
         run("git", "config", "user.email", "test@example.invalid", cwd=self.source)
         run("git", "config", "user.name", "Test", cwd=self.source)
@@ -48,6 +49,7 @@ class TestBump:
         self.release("v0.0.9")
         # The next release adds one skill, retires another, and is followed by a pre-release.
         self.write_skill("added")
+        self.write_agent("reviewer")
         run("git", "rm", "-r", "--quiet", "skills/retired", cwd=self.source)
         self.release("v0.0.10")
         run("git", "commit", "--quiet", "--allow-empty", "-m", "candidate", cwd=self.source)
@@ -59,6 +61,10 @@ class TestBump:
     def write_skill(self, name: str) -> None:
         (self.source / "skills" / name).mkdir(parents=True)
         (self.source / "skills" / name / "SKILL.md").write_text(f"---\nname: {name}\n---\n", encoding="utf-8")
+
+    def write_agent(self, name: str) -> None:
+        (self.source / "agents").mkdir(exist_ok=True)
+        (self.source / "agents" / f"{name}.md").write_text(f"---\nname: {name}\n---\n", encoding="utf-8")
 
     def release(self, tag: str) -> None:
         run("git", "add", ".", cwd=self.source)
@@ -93,6 +99,9 @@ class TestBump:
                     'command_root = "commands"',
                     'commands_target = ".agents/commands"',
                     'commands = ["example.md"]',
+                    'agent_root = "agents"',
+                    'agents_target = ".agents/agents"',
+                    'agents = ["auditor.md"]',
                     "",
                 ]
             ),
@@ -109,11 +118,13 @@ class TestBump:
         entry = tomllib.loads(lock.read_text(encoding="utf-8"))["source"][0]
         assert (entry["tag"], entry["commit"], entry["archive_sha256"]) == ("v0.0.10", *self.pin("v0.0.10"))
         assert entry["skills"] == ["added", "example"]
+        assert entry["agents"] == ["auditor.md", "reviewer.md"]
         assert lock.read_text(encoding="utf-8").startswith("# Pinned agent skills.")
         assert report.moved == ["`fixture` v0.0.9 → v0.0.10 (added added; dropped retired)"]
         # The pin the bump wrote is one the installer verifies and deploys.
         installer.install(self.consumer, lock)
         assert (self.consumer / ".claude" / "skills" / "added" / "SKILL.md").is_file()
+        assert (self.consumer / ".claude" / "agents" / "reviewer.md").is_file()
 
     def test_a_vendor_keeps_its_selection_and_reports_new_skills(self) -> None:
         lock = self.lock("vendor")
@@ -124,7 +135,7 @@ class TestBump:
         entry = tomllib.loads(lock.read_text(encoding="utf-8"))["source"][0]
         assert entry["tag"] == "v0.0.10"
         assert entry["skills"] == ["example"]
-        assert report.available == ["`fixture` skills: added"]
+        assert report.available == ["`fixture` skills: added", "`fixture` agents: reviewer.md"]
         installer.install(self.consumer, lock)
 
     def test_a_current_lock_is_left_byte_for_byte(self) -> None:
