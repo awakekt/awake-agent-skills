@@ -15,7 +15,7 @@ The Awake Engine ecosystem is structured into three strictly decoupled architect
 1. **Layer 1: Awake Core Engine (`awakekt/awake`)** (Apache 2.0):
    Runtime libraries required to compile, execute, and ship games on Desktop, iOS, Android, and WASM (`:awake:scene`, `:awake:physics`, `:awake:render`, `:awake:ui:shadcn`, `:awake:project`, etc.).
 2. **Layer 2: Awake Core Editor (`awakekt/awake`, `:awake:editor:contract`)** (Apache 2.0):
-   Public, vendor-neutral editor contracts, provider extension points, and project plugin metadata published under `com.awakekt:awake-editor-contract`. Allows third-party developers, community creators, and commercial tools to write plugins against an open-source standard.
+   Public, vendor-neutral editor contracts, provider extension points, and project plugin metadata published under `com.awakekt.awake.editor:contract`. Allows third-party developers, community creators, and commercial tools to write plugins against an open-source standard.
 3. **Layer 3: Awake Studio Pro (`awakekt/awake-studio`)** (Commercial):
    Commercial desktop authoring application (`:app:studio`), visual inspectors, collaborative workflows, and the secure runtime loader (`StudioPluginPipeline`) that verifies signatures, checks permissions, and hosts plugins.
 
@@ -27,12 +27,21 @@ All public plugin interfaces live in `:awake:editor:contract`. They are vendor-n
 
 - **Package**: `com.awakekt.awake.editor.core.plugin`
 - **License**: Apache 2.0
-- **Publish Coordinates**: `com.awakekt:awake-editor-contract`
+- **Publish Coordinates**: `com.awakekt.awake.editor:contract`
+
+### Which side of the line
+
+Decision [D35](https://github.com/awakekt/awake/blob/main/docs/architecture/decisions/D35-editor-boundary.md)
+is the rule: if a third-party plugin has to implement or read it, it belongs in this contract; if only
+the host calls it, it stays in Studio. Add a new extension point here first, with a test and a row in
+the [contract README](https://github.com/awakekt/awake/blob/main/awake/editor/contract/README.md)
+provider table, then host it in Studio. A kind with no behaviour stays listed as reserved until it
+has one.
 
 ### Fundamental Rule: Zero Downward or Horizontal Leaks
 - `:awake:editor:contract` **must never** depend on `:app:studio` or any commercial plugin in `awakekt/awake-studio`.
 - `:awake:editor:contract` only depends on Awake Core modules (`:awake:project`, `:awake:ecs`, etc.).
-- Third-party plugins compile strictly against `com.awakekt:awake-editor-contract`.
+- Third-party plugins compile strictly against `com.awakekt.awake.editor:contract`.
 
 ---
 

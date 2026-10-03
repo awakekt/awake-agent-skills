@@ -16,7 +16,7 @@ Awake enforces strict boundaries across three distinct architectural layers:
 1. **Layer 1: Awake Core Engine (`awakekt/awake`)** (Apache 2.0):
    Runtime engine libraries required to compile, execute, and ship games on Desktop, iOS, Android, and WASM (`:awake:scene`, `:awake:physics`, `:awake:render`, `:awake:ui:shadcn`, `:awake:project`, etc.).
 2. **Layer 2: Awake Core Editor (`awakekt/awake`, `:awake:editor:contract`)** (Apache 2.0):
-   Public, vendor-neutral editor contracts and extension points (`com.awakekt:awake-editor-contract`). Enables any developer or toolmaker to author editor plugins without closed-source Studio dependencies.
+   Public, vendor-neutral editor contracts and extension points (`com.awakekt.awake.editor:contract`). Enables any developer or toolmaker to author editor plugins without closed-source Studio dependencies.
 3. **Layer 3: Awake Studio Pro (`awakekt/awake-studio`)** (Commercial):
    Commercial desktop application (`:app:studio`), visual inspectors, collaborative workflows, and the secure runtime loader (`StudioPluginPipeline`).
 
