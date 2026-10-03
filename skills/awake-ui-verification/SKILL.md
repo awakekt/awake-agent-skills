@@ -1,6 +1,10 @@
 ---
 name: awake-ui-verification
 description: Verify Awake UI behavior, rendered output, and source parity. Use when testing a UI change, investigating visual or interaction drift, comparing with a pinned reference, or deciding whether a snapshot baseline may be updated.
+license: Apache-2.0
+metadata:
+  author: awake
+  last-updated: '2026-09-20'
 ---
 
 # Verify Awake UI changes

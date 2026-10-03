@@ -5,7 +5,8 @@ policy remains in the [Awake repository](https://github.com/awakekt/awake/tree/m
 
 ## Ownership
 
-Public personas cover engine maintenance only. Public awake-* skills cover engine, renderer, UI,
+Public personas cover engine maintenance only. Game, tool and plugin authoring guidance lives in
+[awake-game-agent-skills](https://github.com/awakekt/awake-game-agent-skills). Public awake-* skills cover engine, renderer, UI,
 platform, and contributor guidance. Studio Pro strategy and creative production roles belong to
 the separate private Studio bundle; public consumers never pin that private source.
 

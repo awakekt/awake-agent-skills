@@ -1,6 +1,10 @@
 ---
 name: awake-ui-performance
 description: What makes an Awake UI frame expensive, and the traps that make a change silently cost more than it looks. Read before writing anything that runs inside a `row`/`column`/`surface` content lambda, before adding a per-frame allocation, and before claiming a UI performance improvement. Trigger keywords - per-frame allocation, garbage, GC, frame time, ms per frame, wasm vs desktop performance, trial measure, trial pass, cacheKey, LocalCacheKey, UiFrameAllocationProbe, UiFrameTimeProbeTest, wasmJsBrowserTest, UiMeasureTrialStats, perfStatsEnabled, F2 overlay, slow UI, jank, optimize UI.
+license: Apache-2.0
+metadata:
+  author: awake
+  last-updated: '2026-08-30'
 ---
 
 # Awake UI performance

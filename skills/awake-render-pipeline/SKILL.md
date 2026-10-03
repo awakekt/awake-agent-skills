@@ -1,6 +1,10 @@
 ---
 name: awake-render-pipeline
 description: Structure Awake render features, pipelines, materials, and cross-backend rendering. Use before changing Renderer, adding a render pass, modifying draw batching, or moving rendering logic between Vulkan and WebGPU.
+license: Apache-2.0
+metadata:
+  author: awake
+  last-updated: '2026-09-20'
 ---
 
 # Awake render pipeline guidance

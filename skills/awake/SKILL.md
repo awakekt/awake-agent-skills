@@ -1,14 +1,20 @@
 ---
 name: awake
-description: Route technical Awake engine maintenance to the right domain skill or maintainer persona. Use for Awake implementation, review, documentation, and contributor workflows; Studio Pro strategy and creative work belong to the private Studio bundle.
+description: Route Awake Core maintenance (engine, renderer, UI system, platform, releases) to the right maintainer skill or persona. Use when changing awakekt/awake itself; building a game, tool or editor plugin on Awake uses the awake-game-agent-skills bundle instead.
+license: Apache-2.0
+metadata:
+  author: awake
+  last-updated: '2026-10-03'
 ---
 
 # Awake Maintainer Routing
 
-Select a domain skill for implementation work or an Awake persona in [agents/](agents/) for a
-cross-cutting maintainer role. The [public agent catalog](https://github.com/awakekt/awake-agent-skills/blob/main/docs/agent-catalog.md)
-lists persona ownership and routing.
+Pick the maintainer skill for the area you are changing, or an Awake persona in [agents/](agents/)
+for cross-cutting work; the [agent catalog](../../docs/agent-catalog.md) lists each persona's scope.
 
-Awake architecture policy lives in the Awake repository's docs; this bundle supplies
-task-specific execution guidance. Studio Pro strategy and creative personas are distributed
-separately in the private Studio bundle.
+- Building a game, tool or editor plugin on Awake: the
+  [awake-game-agent-skills](https://github.com/awakekt/awake-game-agent-skills) bundle.
+- Studio product and creative-production work: the private `awake-studio-agent-skills` bundle.
+- Writing or changing a skill: [docs/skill-authoring.md](../../docs/skill-authoring.md).
+
+Architecture policy lives in the Awake repository's `docs/`; skills carry task guidance only.

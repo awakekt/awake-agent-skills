@@ -1,6 +1,10 @@
 ---
 name: awake-ui-authoring
 description: Which UI layer to write in - Compose Foundation, Material 3, or shadcn - and the size/spacing rules that keep them separate. Read before adding or changing any UI widget, before adding a `.dp` or pixel constant to a widget, and before naming a primitive. Trigger keywords - material3, shadcn, widget, primitive, component, padding, spacing, size, theme token, Modifier, foundation.
+license: Apache-2.0
+metadata:
+  author: awake
+  last-updated: '2026-09-20'
 ---
 
 # Authoring UI in Awake

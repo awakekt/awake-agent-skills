@@ -1,6 +1,10 @@
 ---
 name: awake-copyright-provenance
 description: Record and verify lawful provenance before adapting or copying source into Awake.
+license: Apache-2.0
+metadata:
+  author: awake
+  last-updated: '2026-08-30'
 ---
 
 # Awake Copyright Provenance
