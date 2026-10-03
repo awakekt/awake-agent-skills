@@ -4,7 +4,7 @@ description: Author, extend, and verify vendor-neutral editor plugins and contra
 license: Apache-2.0
 metadata:
   author: awake
-  last-updated: '2026-09-19'
+  last-updated: '2026-10-03'
   keywords: Awake, Awake Core Editor, EditorPlugin, PluginManifest, EditorProvider, PluginId, PluginRegistry, ProviderRegistry, 3-layer architecture
 ---
 
@@ -94,8 +94,7 @@ data class PluginManifest(
     val supportedPlatforms: List<String> = emptyList(),
     val targetJvmVersion: Int? = null,
     val dependencies: List<PluginDependency> = emptyList(),
-    val isPro: Boolean = false,
-    val requiredLicense: String? = null,
+    val requiredLicense: String? = null,   // entitlement a host must hold before activation; null = free
     val category: String = "Tools",
     val tags: List<String> = emptyList(),
     val documentationUrl: String = "",
@@ -193,6 +192,8 @@ When adding or modifying editor contracts in Awake Core:
 2. **Tests**: `./gradlew :awake:editor:contract:desktopTest`.
 3. **Detekt**: Verify zero violations with `./gradlew :awake:editor:contract:detekt`.
 4. **No deprecated shims**: Do not introduce `EditorDock`, `EntityPreset`, `V1` suffixes, `contributesDockTab`, or `dockTabTitle`.
+   Do not add a vendor tier flag such as `isPro`; the contract names no product. A host maps
+   `requiredLicense` to its own tiers.
 5. **No re-introduction of old prefixes**: Use canonical names from the table above.
 6. **Payload check**: If `PluginManifest.entrypointClass` is non-blank, the `.awakeplugin` archive must have non-empty `payloadBytes` — enforced by `PluginPreflightChecker` in the Pro pipeline.
 7. **License & Provenance**: All files in `:awake:editor:contract` must have the Apache-2.0 header and `Ron June Valdoz` copyright notice.

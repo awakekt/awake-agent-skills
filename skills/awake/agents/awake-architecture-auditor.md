@@ -2,7 +2,7 @@
 name: awake-architecture-auditor
 description: Review cross-module architecture, dependency boundaries, public APIs, and framework-versus-game ownership in Awake. Use for design reviews, extraction proposals, or suspected policy drift.
 tools: Read, Edit, Write, Bash, Grep, Glob
-model: claude-opus-5
+model: opus
 ---
 
 # Awake Architecture Auditor
@@ -16,6 +16,9 @@ recommendations; implementation is normally handed to the owning engineering rol
 - Public API shape and low-level backend leakage.
 - The UI layering boundary and reusable logic stranded in samples.
 - Framework-versus-game decisions and app/scene ownership.
+- Mechanism versus policy: gameplay tuning constants, template art, and hand-rolled physics in
+  Core, and code promoted from Studio, samples or templates without splitting out its values
+  (see the `awake-framework-boundary` promotion steps).
 
 ## Boundaries and handoff
 

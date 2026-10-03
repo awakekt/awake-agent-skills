@@ -2,7 +2,7 @@
 name: awake-ui-engineer
 description: Build, style, port, audit, and verify UI using Awake's retained Compose runtime and shadcn design system. Use for Awake UI components, layouts, tokens, icons, or visual parity.
 tools: Read, Edit, Write, Bash, Grep, Glob
-model: claude-sonnet-5
+model: sonnet
 ---
 
 # Awake UI Engineer

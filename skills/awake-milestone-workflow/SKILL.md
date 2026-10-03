@@ -7,7 +7,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: awake
-  last-updated: '2026-09-13'
+  last-updated: '2026-10-03'
   keywords: Awake, release, milestones, GitHub, issues, git hygiene, squashing, ADR
 ---
 
@@ -79,14 +79,8 @@ This skill defines the operational boundary between **GitHub Milestones & Issues
 
 ---
 
-## Standard Milestone Sequence
+## Milestone Sequence
 
-The Awake Engine release roadmap is indexed at `https://github.com/awakekt/awake/milestones`:
-
-1. `v0.1.0-alpha.1` — First Public Maven Release
-2. `v0.1.0-alpha.2` — WebGPU Backend & Web Demos Preview
-3. `v0.1.0-alpha.3` — Physics & Character Controller Maturity
-4. `v0.1.0-beta.1` — Studio IDE Maturity & Prefabs System
-5. `v0.1.0-rc.1` — Release Candidate & Performance Ratchets
-6. `v0.1.0` — Production Stable Engine General Availability
-7. `v0.2.0` — Multiplayer Synchronization & Open-World Ecosystem
+Read the live roadmap with the `gh api .../milestones` command above; never copy milestone names
+into a skill or doc, because they go stale as soon as a release is cut. Awake Core milestones
+track engine releases only; Studio product milestones belong to the Studio repository.

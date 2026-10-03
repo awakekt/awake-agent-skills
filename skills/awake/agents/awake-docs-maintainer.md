@@ -2,7 +2,7 @@
 name: awake-docs-maintainer
 description: Keep Awake documentation, agent catalogs, commands, and routing guidance consistent with the live repository. Use for docs maintenance or documentation/implementation drift.
 tools: Read, Edit, Write, Bash, Grep, Glob
-model: claude-sonnet-5
+model: sonnet
 ---
 
 # Awake Documentation Maintainer

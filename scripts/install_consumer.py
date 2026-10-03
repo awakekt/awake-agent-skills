@@ -24,8 +24,13 @@ DIGEST = re.compile(r"^[0-9a-f]{64}$")
 KINDS = {"vendor", "maintained-core", "maintained-studio"}
 SKILL_TARGET = ".agents/skills"
 COMMAND_TARGET = ".agents/commands"
+AGENT_TARGET = ".agents/agents"
 # Agents that do not read .agents/ receive the same deployment in their own project directory.
-MIRRORS = {SKILL_TARGET: (".claude/skills",), COMMAND_TARGET: (".claude/commands",)}
+MIRRORS = {
+    SKILL_TARGET: (".claude/skills",),
+    COMMAND_TARGET: (".claude/commands",),
+    AGENT_TARGET: (".claude/agents",),
+}
 MARKER = ".agent-source"
 
 
@@ -50,6 +55,8 @@ def load_lock(path: Path) -> list[dict]:
             raise ValueError(f"source {entry['id']}: skills must deploy to {SKILL_TARGET}")
         if entry.get("commands") and entry.get("commands_target") != COMMAND_TARGET:
             raise ValueError(f"source {entry['id']}: commands must deploy to {COMMAND_TARGET}")
+        if entry.get("agents") and entry.get("agents_target") != AGENT_TARGET:
+            raise ValueError(f"source {entry['id']}: agents must deploy to {AGENT_TARGET}")
     return entries
 
 
@@ -93,6 +100,11 @@ def deployments(project: Path, entry: dict) -> list[tuple[Path, Path, list[str]]
             (cache / entry.get("command_root", "commands"), project / target, entry["commands"])
             for target in (COMMAND_TARGET, *MIRRORS[COMMAND_TARGET])
         ]
+    if entry.get("agents"):
+        result += [
+            (cache / entry.get("agent_root", "agents"), project / target, entry["agents"])
+            for target in (AGENT_TARGET, *MIRRORS[AGENT_TARGET])
+        ]
     return result
 
 
@@ -110,7 +122,7 @@ def state(origin: Path, target: Path) -> str:
     if not target.exists() and not target.is_symlink():
         return "missing"
     if target.is_file() and not target.is_symlink():
-        # The copy fallback for command files keeps no provenance, so content decides.
+        # The copy fallback for command and agent files keeps no provenance, so content decides.
         return "ok" if origin.is_file() and filecmp.cmp(origin, target, shallow=False) else "outdated"
     installed = installed_origin(target)
     if installed is None:
@@ -130,7 +142,9 @@ def status(project: Path, entries: list[dict]) -> list[tuple[str, Path]]:
                 if current != "ok":
                     problems.append((current, destination / name))
     vendor = project / ".agents" / "vendor"
-    for target in (SKILL_TARGET, *MIRRORS[SKILL_TARGET], COMMAND_TARGET, *MIRRORS[COMMAND_TARGET]):
+    for target in (
+        SKILL_TARGET, *MIRRORS[SKILL_TARGET], COMMAND_TARGET, *MIRRORS[COMMAND_TARGET], AGENT_TARGET, *MIRRORS[AGENT_TARGET]
+    ):
         destination = project / target
         if not destination.is_dir():
             continue

@@ -3,7 +3,7 @@ name: awake-terrain-authoring
 description: Author Awake heightmaps, dynamic terrain edits, geometry clipmaps, texture splatting, and terrain collision composition. Trigger keywords - clipmap, geometry clipmap, concentric rings, terrain driver, worldstream, cell streaming, heightfield tile, splat map, texture array, terrain splatting, tile streaming.
 metadata:
   author: awake
-  last-updated: '2026-09-04'
+  last-updated: '2026-10-03'
 ---
 
 # Awake Terrain Authoring
@@ -16,18 +16,22 @@ terrain capability.
 
 Awake provides two complementary "cousin" paradigms for rendering terrains at scale:
 
-1. **Geometry Clipmaps (`awake:asset:terrain:clipmap`)**:
+1. **Geometry Clipmaps (`awake:asset:terrain`, `clipmap` package)**:
    - Camera-centric nested concentric rings (`TerrainClipmapGeometry`, `TerrainClipmapTracker`).
    - Rings snap to discrete grid increments as the camera moves; meshes are created once on attach and displaced on the GPU.
    - **$O(1)$ constant VRAM footprint** with zero chunk boundary seams or pop-in. Best for continuous single-zone landscapes, island maps, and heightmap-driven regions.
-2. **Cell-Based Worldstream (`awake-pro:plugins:worldstream`)**:
-   - Spatial partitioning across discrete $(x, z)$ world coordinates (`MeshCellStreamer`, `HeightFieldCellStreaming`).
-   - Asynchronously streams cell mesh geometry and Jolt physics colliders (`heightFieldTile`) off the frame thread.
-   - Best for massive multi-kilometer MMOs, multi-region worlds, and background tile streaming.
+2. **Cell-Based Worldstream (`awake:scene:world` + `awake:scene:worldstream`)**:
+   - `scene:world` streams discrete $(x, z)$ cell coordinates and stays content-agnostic.
+   - `scene:worldstream` fills each cell off the frame thread: `MeshCellStreamer`,
+     `PhysicsCellStreamer`, `heightFieldCellStreamer` (Jolt heightfield tiles) and
+     `VirtualTerrainCellStreamListener`, wired by `WorldstreamTerrainDriver`.
+   - Best for large multi-region worlds and background tile streaming.
+   - Both modules are Core runtime. Studio's worldstream plugin is only the authoring tool over
+     them; a game never needs Studio to stream cells.
 
 ## Multi-Texture Splatting
 
-- Multi-layer ground blending uses `TerrainSplatWeightMap` (4-channel RGBA weights) in `awake:asset:terrain:splat`.
+- Multi-layer ground blending uses `TerrainSplatWeightMap` (4-channel RGBA weights) in `awake:asset:terrain` (`splat` package).
 - Rendered on the GPU using `PackShaderSets.TerrainSplat` (`AslTerrainSplatShader` in `awake:asset:shader-pack`) via a 4-layer `texture_2d_array` diffuse texture.
 - Check a layered surface with the `DominantLayer`, `LayerWeights` and `Lightmap` [debug views](../awake-render-debug-views/SKILL.md) before blaming import data or the shader.
 
