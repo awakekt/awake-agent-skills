@@ -42,7 +42,7 @@ Each project pins the bundles it needs in `.agents/skills.lock.toml`:
 | `awake-shadcn-parity-workflow` | Verify Awake shadcn components end to end, from the pinned official reference through the standalone recipe and the real showcase/catalog shell |
 | `awake-shadcn-recipe-authoring` | Maintainer-facing how-to for BUILDING/EXTENDING shadcn-flavored components inside Awake's ui-designsystem itself -- not for an app/sample that just calls an existing shadcn* component |
 | `awake-ui-authoring` | Which UI layer to write in - Compose Foundation, Material 3, or shadcn - and the size/spacing rules that keep them separate |
-| `awake-ui-icons` | How icon vector data enters Awake - generated from SVG sources via tools/icons/svg_to_ui_image_vector.py, never hand-transcribed |
+| `awake-ui-icons` | How icon vector data enters Awake - official SVGs generated into ImageVector objects by the icon-codegen Gradle plugin, never hand-transcribed |
 | `awake-ui-performance` | What makes an Awake UI frame expensive, and the traps that make a change silently cost more than it looks |
 | `awake-ui-verification` | Verify Awake UI behavior, rendered output, and source parity |
 
