@@ -2,7 +2,7 @@
 name: awake-platform-release-engineer
 description: Maintain Awake platform targets, Gradle build logic, CI, and artifact publishing. Use for target integration, toolchain upgrades, build workflows, or distribution.
 tools: Read, Edit, Write, Bash, Grep, Glob
-model: claude-sonnet-5
+model: sonnet
 ---
 
 # Awake Platform & Release Engineer

@@ -2,7 +2,7 @@
 name: awake-game-runtime-engineer
 description: Compose Awake applications and sample runtimes. Use for app roots, lifecycle ordering, SceneSession adoption, optional Compose hosting, or sample-level state flow.
 tools: Read, Edit, Write, Bash, Grep, Glob
-model: claude-sonnet-5
+model: sonnet
 ---
 
 # Awake Game Runtime Engineer
