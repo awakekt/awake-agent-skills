@@ -1,9 +1,6 @@
----
-name: awake-shadcn-to-compose
-description: Translate official shadcn component anatomy, variants, and Tailwind source into Awake Compose recipes. Use for a shadcn/ui reference in a web-to-Compose port; do not use it merely because a site uses Base UI or resembles shadcn.
----
-
 # shadcn → Awake Compose
+
+Reference for [`awake-web-to-compose`](../SKILL.md).
 
 Use official shadcn source as evidence for component anatomy, state contracts, variant values, and
 visual policy. Produce typed Awake Compose recipes built on Foundation; do not import React,
@@ -32,7 +29,7 @@ Read the component's pinned `.tsx` and extract:
 - Tailwind values, including line-height and all padding axes.
 
 Route its Tailwind utilities through
-[`awake-tailwind-to-compose`](../awake-tailwind-to-compose/SKILL.md). Map mechanics to existing
+the [Tailwind reference](tailwind.md). Map mechanics to existing
 Compose/Foundation primitives first. If the required mechanics do not exist, record a Foundation
 gap instead of embedding a custom state machine in a visual recipe.
 

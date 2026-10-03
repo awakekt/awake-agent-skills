@@ -7,7 +7,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: awake
-  last-updated: '2026-08-25'
+  last-updated: '2026-10-03'
   keywords: Awake, ECS, World, Entity, SceneDocument, SceneSession, SceneSchedule, TransformSystem, RenderSystem
 ---
 
@@ -54,6 +54,20 @@ terrain, placement, or generation. Public scene code owns only the generic exten
   private pack can restore them later.
 - Do not add genre-specific world rules, water, biomes, vegetation, or procedural algorithms to
   the public scene runtime.
+
+## Physics in a Scene
+
+Use the `scene:physics` components; never touch a Jolt handle or native pointer from game code.
+
+- Physics steps on a fixed timestep, separate from the render frame. Put gameplay that reacts to
+  physics in the fixed update, not the frame update.
+- Move characters through the character controller binding. A hand-rolled gravity or ground snap
+  is game code that fights the simulation.
+- Tuning (speeds, gravity, jump height) is a field on a scene component that the game or template
+  authors as data, not a constant in a system.
+- Destroying an entity removes its body first; do not cache body handles past entity teardown.
+
+Changing the physics contract or the Jolt bridge itself: `awake-physics-jolt`.
 
 ## Lifecycle and Verification
 

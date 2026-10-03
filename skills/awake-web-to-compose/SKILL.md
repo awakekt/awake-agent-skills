@@ -1,6 +1,6 @@
 ---
 name: awake-web-to-compose
-description: Port a website or raw HTML/CSS into Awake Compose. Routes Tailwind and shadcn sources to focused translation skills; do not use to add browser runtimes to the engine.
+description: Port a website or raw HTML/CSS into Awake Compose. Covers Tailwind and shadcn sources through its references; do not use to add browser runtimes to the engine.
 ---
 
 # Web Reference → Awake Compose
@@ -77,7 +77,7 @@ create a generic HTML element layer, CSS cascade, class-string interpreter, or p
 API to make the port look literal.
 
 When the source contains Tailwind utilities, read
-[`awake-tailwind-to-compose`](../awake-tailwind-to-compose/SKILL.md). It owns Tailwind-scale and
+the [Tailwind reference](references/tailwind.md). It owns Tailwind-scale and
 utility translation; apply its conclusions through the Compose-native primitives above.
 
 ### 3. Map behaviour and accessibility
@@ -107,14 +107,13 @@ component's internal content padding, and translate CSS margins to the parent la
 
 ### Tailwind and shadcn
 
-- Source Tailwind utilities → read
-  [`awake-tailwind-to-compose`](../awake-tailwind-to-compose/SKILL.md).
-- Source official shadcn recipes or component anatomy → read
-  [`awake-shadcn-to-compose`](../awake-shadcn-to-compose/SKILL.md).
+- Source Tailwind utilities → read the [Tailwind reference](references/tailwind.md).
+- Source official shadcn recipes or component anatomy → read the
+  [shadcn reference](references/shadcn.md).
 - Base UI/Radix without a shadcn recipe remains a behaviour reference here; do not give it
   Shadcn visual identity by association.
 
-Both child skills are source translators. They do not authorize importing Tailwind, React, DOM,
+Both references are source translators. They do not authorize importing Tailwind, React, DOM,
 or browser event APIs into the product.
 
 ## Deliverable shape

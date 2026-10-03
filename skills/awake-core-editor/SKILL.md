@@ -1,6 +1,6 @@
 ---
 name: awake-core-editor
-description: Author, extend, and verify vendor-neutral editor plugins and contracts in Awake Core (:awake:editor:contract). Use before adding editor extension points, writing community plugins, or defining editor provider contracts.
+description: Maintain the vendor-neutral editor plugin contract in Awake Core (:awake:editor:contract): its layer boundary, canonical names and verification. Use before changing an editor extension point or provider contract. Plugin authors use awake-editor-plugin-authoring.
 license: Apache-2.0
 metadata:
   author: awake
@@ -75,112 +75,9 @@ The interfaces `EditorProvider` and `EditorProviderKind` **keep** their `Editor`
 
 ---
 
-## Plugin Contract Components
-
-### 1. Plugin Manifest (`PluginManifest`)
-
-Serialized descriptor for marketplace and `.awakeplugin` archives:
-
-```kotlin
-data class PluginManifest(
-    val id: String,                        // reverse-domain (e.g. "com.example.terrain")
-    val name: String,                      // human-readable display name
-    val version: String,                   // SemVer (e.g. "1.2.0")
-    val author: String = "Community",
-    val description: String = "",
-    val entrypointClass: String = "",      // FQN implementing EditorPlugin; if non-blank, archive MUST have payload bytes
-    val requiredApiVersion: Int = 1,
-    val minEngineVersion: String? = null,
-    val supportedPlatforms: List<String> = emptyList(),
-    val targetJvmVersion: Int? = null,
-    val dependencies: List<PluginDependency> = emptyList(),
-    val requiredLicense: String? = null,   // entitlement a host must hold before activation; null = free
-    val category: String = "Tools",
-    val tags: List<String> = emptyList(),
-    val documentationUrl: String = "",
-)
-```
-
-> **⚠️ Important**: `contributesDockTab` and `dockTabTitle` were retired. Bottom panel contributions are
-> now declared by the plugin's `createProviders()` returning providers with `EditorProviderKind.BottomPanel`.
-> Never re-add these manifest fields.
-
-### 2. Plugin Lifecycle (`EditorPlugin` + `PluginLifecycle`)
-
-```kotlin
-// The named extension point interface (keeps "Editor" prefix)
-interface EditorPlugin {
-    val metadata: PluginMetadata               // use PluginMetadata, NOT EditorPluginMetadata
-
-    fun createProviders(): List<EditorProvider> // return providers; no direct registry mutation
-}
-
-// Optional: for plugins that own resources beyond their providers
-interface PluginLifecycle {
-    fun dispose()                              // called after providers are unregistered
-}
-```
-
-### 3. Editor Providers (`EditorProvider` & `EditorProviderKind`)
-
-Plugins extend editor capabilities by returning typed `EditorProvider` implementations from `createProviders()`:
-
-| `EditorProviderKind` | Purpose | Typed sub-interface |
-|---|---|---|
-| `Component` | Custom component panels | `ComponentProvider` |
-| `Asset` | Asset import/processing | `AssetProvider` |
-| `Environment` | Sky, lighting, ambient | `EnvironmentProvider` |
-| `Animation` | Animation curves/clips | `AnimationProvider` |
-| `Build` | Build steps & export | `BuildProvider` |
-| `BottomPanel` | Docked bottom tray panels | (raw `EditorProvider`) |
-| `Toolbar` | Toolbar actions & controls | (raw `EditorProvider`) |
-| `Sidebar` | Left sidebar tabs | (raw `EditorProvider`) |
-| `InspectorPanel` | Right inspector tabs | (raw `EditorProvider`) |
-| `Keybinding` | Keyboard shortcut maps | (raw `EditorProvider`) |
-| `Workspace` | Central canvas (viewport, visual scripting) | (raw `EditorProvider`) |
-| `EntityTemplate` | Insertable entity archetypes | (raw `EditorProvider`) |
-| `SceneSystems` | ECS systems injected into the scene loop | (raw `EditorProvider`) |
-| `ViewportTool` | Interactive viewport tools | (raw `EditorProvider`) |
-| `FloatingCard` | Floating HUD cards over the 3D viewport | (raw `EditorProvider`) |
-
-### 4. `PluginRegistry` & `ProviderRegistry`
-
-The host wires `PluginRegistry` → `ProviderRegistry`:
-
-```kotlin
-val providerRegistry = ProviderRegistry()        // was EditorProviders
-val pluginRegistry = PluginRegistry(providerRegistry) // was EditorPluginRegistry
-pluginRegistry.install(myPlugin)                 // calls myPlugin.createProviders() atomically
-```
-
-### 5. Asset Converters (`AssetConverterPlugin`)
-
-```kotlin
-interface AssetConverterPlugin : EditorPlugin {
-    fun getConverters(): List<AssetConverter>
-    override fun createProviders(): List<EditorProvider> = emptyList() // default no-op
-}
-```
-
----
-
-## Project Plugin Reference
-
-Projects declare their active plugins in `awake.project.json` using `AwakeProjectPluginReference` in `:awake:project`:
-
-```kotlin
-data class AwakeProjectPluginReference(
-    val id: String,
-    val path: String,               // project-relative path to the plugin bundle
-    val version: String = "",
-    val sha256: String? = null,     // optional content integrity pin
-    val entrypointClass: String? = null,
-    val required: Boolean = false,
-)
-```
-
-- `sha256`: Prevents tampered or mismatched plugin binaries.
-- `entrypointClass`: The fully qualified name implementing `EditorPlugin`.
+The plugin-facing API (manifest, lifecycle, providers, registries, asset converters, project plugin
+references) is documented for plugin authors in `awake-editor-plugin-authoring`. This skill covers
+maintaining the contract itself.
 
 ---
 
