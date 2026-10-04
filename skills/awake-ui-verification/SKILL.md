@@ -4,7 +4,7 @@ description: Verify Awake UI behavior, rendered output, and source parity. Use w
 license: Apache-2.0
 metadata:
   author: awake
-  last-updated: '2026-09-20'
+  last-updated: '2026-10-03'
 ---
 
 # Verify Awake UI changes
@@ -40,3 +40,7 @@ the command sequence is in
   the diff, then update the PNG and any separate signature maps together.
 - Before calling a visual or behavioral change complete, inspect fresh artifacts and run the
   relevant focused tests. Use a real backend capture only when the question involves GPU behavior.
+- A UI fix or new UI adds the baseline or `UI_PARITY_SCENARIOS` entry that shows it, so the PR's
+  evidence comment carries a Before | After. A silent evidence run means the case was not captured,
+  not that nothing changed; see
+  [awake-render-headless-verification](../awake-render-headless-verification/SKILL.md) Rule 7.
