@@ -4,7 +4,7 @@ description: Maintain the vendor-neutral editor plugin contract in Awake Core (:
 license: Apache-2.0
 metadata:
   author: awake
-  last-updated: '2026-10-03'
+  last-updated: '2026-10-04'
   keywords: Awake, Awake Core Editor, EditorPlugin, PluginManifest, EditorProvider, PluginId, PluginRegistry, ProviderRegistry, 3-layer architecture
 ---
 
@@ -38,9 +38,19 @@ the [contract README](https://github.com/awakekt/awake/blob/main/awake/editor/co
 provider table, then host it in Studio. A kind with no behaviour stays listed as reserved until it
 has one.
 
+### Scene-bound hooks
+
+`ViewportToolProvider`, `SceneSystemsProvider` and `ComponentInspectorProvider` take only Core types:
+`World`, `Entity`, `Lens`, `Ray`, `Mat4`, `Key`, `Color`. Studio implements the host-side interfaces
+(`EditHistory`, `SceneSelection`, `InspectorFieldScope`) over its own state. Decision
+[D36](https://github.com/awakekt/awake/blob/main/docs/architecture/decisions/D36-scene-bound-editor-hooks.md)
+fixes two rules a contract change must keep: every plugin scene edit goes through `EditHistory`, and
+edit-time systems never run on the play-mode world. Do not make the contract depend on render
+modules; overlays use the contract's own `OverlayLine`, and the host converts it.
+
 ### Fundamental Rule: Zero Downward or Horizontal Leaks
 - `:awake:editor:contract` **must never** depend on `:app:studio` or any commercial plugin in `awakekt/awake-studio`.
-- `:awake:editor:contract` only depends on Awake Core modules (`:awake:project`, `:awake:ecs`, etc.).
+- `:awake:editor:contract` only depends on Awake Core modules (`:awake:ecs`, `:awake:core:math`, `:awake:core:input`, `:awake:core:color`, `:awake:compose:*`, etc.), never render modules.
 - Third-party plugins compile strictly against `com.awakekt.awake.editor:contract`.
 
 ---
