@@ -1,10 +1,17 @@
 ---
 name: awake-framework-boundary
-description: Decide whether a proposed capability belongs in the Awake framework or in a consuming game repository. Use before adding any engine module, before moving code from Awake Studio, a sample or a template into Awake Core, before adding a gameplay system or a default tuning value, and before introducing networking, persistence, server, or MMO-oriented abstractions.
+description: >
+  Decide whether a proposed capability belongs in the Awake framework or in a consuming game
+  repository, and whether a piece of code belongs in a scene module or in a capability module.
+  Use before adding any engine module, before extending or adding an option, field, system or
+  behaviour to anything under awake/scene/ (scene components, scene schemas, scene systems),
+  before moving code from Awake Studio, a sample or a template into Awake Core, before adding a
+  gameplay system or a default tuning value, and before introducing networking, persistence,
+  server, or MMO-oriented abstractions.
 license: Apache-2.0
 metadata:
   author: awake
-  last-updated: '2026-09-29'
+  last-updated: '2026-10-05'
 ---
 
 # Awake Framework Boundary
@@ -105,4 +112,60 @@ New capability X:
   Needs to bind X into ECS entities/components?     -> awake:scene:X (scene binding layer)
   Both?                                              -> awake:X:api + awake:scene:X
 ```
+
+The test places a module. It does not let a capability's logic ride along inside `awake:scene:X`:
+the algorithms and state stay in `awake:X`, and the next section sorts every piece of a change.
+
+## Scene Is The Wrapper, Not The Home For Capabilities
+
+Awake is a library first. `awake:scene:*` binds capabilities into the ECS scene graph and the scene
+document; a capability's logic must not live there. Run this section before you add to or change
+anything under `awake/scene/`: extending a component, adding an option or field to a schema, adding
+a system, or adding behaviour to one that exists.
+
+### Sort every piece
+
+- **Scene** (stays in `awake:scene:<x>`): a document schema (`Scene<X>`) and its validation; the
+  component binding; the mapping from schema to the capability's types; the system that runs the
+  capability over the ECS world; loading a document's assets.
+- **Capability** (its own module outside `scene/`): an algorithm, state or behaviour with its own
+  API that someone could use without a scene, such as simulation, sampling, culling, clocks and
+  curves.
+
+### Rules
+
+1. A capability module depends on no `scene:*` module. `awakekt/awake` enforces this with the
+   `verifyCapabilityLayering` Gradle gate.
+2. A capability's types never hold a `Scene*` schema type. The scene module maps schema to
+   capability types in one mapping file. An exposure test fails when a capability option is neither
+   mapped from a scene field nor listed as code-only.
+3. To extend a capability that still lives in a scene module, extract it first, or say in the PR
+   that it is debt and why.
+4. A new option is added in this order: capability type, scene field, mapping, docs, exposure test.
+
+### Before you edit
+
+- Name the thing you are adding and sort it: scene piece or capability piece.
+- A capability piece needs a home outside `scene/`. If it has none, extract it or record the debt
+  under rule 3.
+- A capability piece must compile and be testable with no `scene:*` module on its classpath. If it
+  does not, a scene type leaked in: move that type back to the mapping.
+- A scene piece needs its schema field, its mapping line, its validation and its docs.
+- Add or update the exposure test, and list a code-only option as code-only, never silently.
+
+### Worked example
+
+Particles are the pattern. `awake:particles` is the capability: the emitters and their options, the
+simulation, the draw packets, and `ParticleSystem`, which steps emitters over a `World` and so needs
+the ECS but no `scene:*` module. Where an emitter's entity is comes from an `EmitterPlacement` the
+library asks for. `awake:scene:particles` is the wrapper: the `Scene*` schema, the component, the one
+mapping file from schema to `awake:particles` types, `ParticleContentSystem` (which gives each placed
+emitter its `ParticleEmitter`) and `TransformPlacement` (which answers from the scene's `Transform`).
+A system is scene-side when it reads a scene type, not merely because it runs over a `World`. A new
+particle option is a field on the capability's type, a field on the schema, one mapping line, docs,
+and a passing exposure test.
+
+`awake:core:audio` plus `awake:scene:audio` is an existing split of the same shape: the player,
+clips and decoding live in `core:audio` with no scene dependency, and `scene:audio` holds the
+`AudioSource` component and the `AudioSystem` that runs it over the `World`.
 
