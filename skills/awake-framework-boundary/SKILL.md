@@ -155,11 +155,15 @@ a system, or adding behaviour to one that exists.
 
 ### Worked example
 
-Particles are the pattern. `awake:particles` is the capability: the simulation and its own emitter
-types, with no `scene:*` dependency. `awake:scene:particles` is the wrapper: the `Scene*` schema, the
-component, the one mapping file from schema to `awake:particles` types, and the system that steps
-emitters over the `World`. A new particle option is a field on the capability's type, a field on the
-schema, one mapping line, docs, and a passing exposure test.
+Particles are the pattern. `awake:particles` is the capability: the emitters and their options, the
+simulation, the draw packets, and `ParticleSystem`, which steps emitters over a `World` and so needs
+the ECS but no `scene:*` module. Where an emitter's entity is comes from an `EmitterPlacement` the
+library asks for. `awake:scene:particles` is the wrapper: the `Scene*` schema, the component, the one
+mapping file from schema to `awake:particles` types, `ParticleContentSystem` (which gives each placed
+emitter its `ParticleEmitter`) and `TransformPlacement` (which answers from the scene's `Transform`).
+A system is scene-side when it reads a scene type, not merely because it runs over a `World`. A new
+particle option is a field on the capability's type, a field on the schema, one mapping line, docs,
+and a passing exposure test.
 
 `awake:core:audio` plus `awake:scene:audio` is an existing split of the same shape: the player,
 clips and decoding live in `core:audio` with no scene dependency, and `scene:audio` holds the
