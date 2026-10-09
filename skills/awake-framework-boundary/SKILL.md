@@ -11,7 +11,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: awake
-  last-updated: '2026-10-05'
+  last-updated: '2026-10-09'
 ---
 
 # Awake Framework Boundary
@@ -53,9 +53,9 @@ Awake enforces strict boundaries across three distinct architectural layers:
    asset the template writes. Core built-ins are neutral primitives only, such as `cube`, `sphere`
    and `plane`.
 
-Use `awake-architecture-auditor` (`skills/awake/agents/awake-architecture-auditor.md`) for the
-decision; where that persona is not installed, apply these rules directly and record rule 5 in the
-PR. Use implementation skills only after it.
+Use the `awake-architecture-auditor` persona for the decision; where that persona is not
+installed, apply these rules directly and record rule 5 in the PR. Use implementation skills only
+after it.
 
 ## Where a Capability Lives
 

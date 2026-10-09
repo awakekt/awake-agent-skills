@@ -6,7 +6,9 @@
 Each moved source gets the commit and archive digest the installer verifies. A maintained bundle
 (maintained-core, maintained-studio) is consumed whole, so its skill, command and persona lists
 follow the release; a vendor keeps its curated selection, losing only names the release no longer ships, and
-reports new ones for a reviewer to adopt. Only stable `vX.Y.Z` tags count; pre-releases are skipped.
+reports new ones for a reviewer to adopt. A release whose bundle.toml moves its persona or command
+folder moves the entry's agent_root or command_root with it. Only stable `vX.Y.Z` tags count;
+pre-releases are skipped.
 """
 
 from __future__ import annotations
@@ -25,6 +27,9 @@ from pathlib import Path
 RELEASE_TAG = re.compile(r"^v(\d+)\.(\d+)\.(\d+)$")
 MIRRORED_KINDS = {"maintained-core", "maintained-studio"}
 ARRAY_WIDTH = 100
+# Lockfile root key -> the list it serves, which is also the installer's default root, and the
+# bundle.toml key a release declares it with.
+ROOTS = {"command_root": ("commands", "command_dir"), "agent_root": ("agents", "persona_dir")}
 
 
 @dataclass
@@ -54,6 +59,8 @@ class Release:
     skills: list[str]
     commands: list[str]
     agents: list[str]
+    # The command and persona folders the release's bundle.toml declares; a vendor declares none.
+    roots: dict[str, str] = field(default_factory=dict)
 
 
 def git(*args: str, cwd: Path | None = None) -> str:
@@ -80,9 +87,18 @@ def fetch_release(entry: dict, tag: str, workdir: Path) -> Release:
         for path in files
         if path.startswith(skill_root) and path.count("/") == skill_root.count("/") + 1 and path.endswith("/SKILL.md")
     )
-    commands = top_level_markdown(files, entry.get("command_root", "commands"))
-    agents = top_level_markdown(files, entry.get("agent_root", "agents"))
-    return Release(tag, commit, hashlib.sha256(archive).hexdigest(), skills, commands, agents)
+    roots = bundle_roots(checkout, commit, files)
+    commands = top_level_markdown(files, roots.get("command_root", entry.get("command_root", "commands")))
+    agents = top_level_markdown(files, roots.get("agent_root", entry.get("agent_root", "agents")))
+    return Release(tag, commit, hashlib.sha256(archive).hexdigest(), skills, commands, agents, roots)
+
+
+def bundle_roots(checkout: Path, commit: str, files: list[str]) -> dict[str, str]:
+    """The lockfile roots a release's bundle.toml declares, so a moved folder moves the lock with it."""
+    if "bundle.toml" not in files:
+        return {}
+    config = tomllib.loads(git("show", f"{commit}:bundle.toml", cwd=checkout))
+    return {key: config[name].rstrip("/") for key, (_, name) in ROOTS.items() if config.get(name)}
 
 
 def top_level_markdown(files: list[str], root: str) -> list[str]:
@@ -115,10 +131,26 @@ def render_array(key: str, names: list[str]) -> str:
     return f"{key} = [\n" + "\n".join(lines) + "\n]"
 
 
-def rewrite(block: str, entry: dict, release: Release, lists: dict[str, list[str]]) -> str:
-    """[block] with its pin and lists replaced, everything else (comments, order) kept."""
+def moved_roots(entry: dict, release: Release) -> dict[str, str]:
+    """The roots [entry] must change to read the lists it declares from [release]."""
+    return {
+        key: root
+        for key, root in release.roots.items()
+        if ROOTS[key][0] in entry and root != entry.get(key, ROOTS[key][0])
+    }
+
+
+def rewrite(block: str, entry: dict, release: Release, lists: dict[str, list[str]], roots: dict[str, str]) -> str:
+    """[block] with its pin, roots and lists replaced, everything else (comments, order) kept."""
     for key, value in (("tag", release.tag), ("commit", release.commit), ("archive_sha256", release.digest)):
         block = re.sub(rf'^{key} = ".*"$', f'{key} = "{value}"', block, count=1, flags=re.MULTILINE)
+    for key, root in roots.items():
+        line = f'{key} = "{root}"'
+        if re.search(rf'^{key} = ".*"$', block, flags=re.MULTILINE):
+            block = re.sub(rf'^{key} = ".*"$', lambda _: line, block, count=1, flags=re.MULTILINE)
+        else:
+            # The entry relied on the installer's default; spell the new root out above its list.
+            block = re.sub(rf"^(?={ROOTS[key][0]} = \[)", lambda _: line + "\n", block, count=1, flags=re.MULTILINE)
     # An unchanged list keeps its hand wrapping, so the diff shows only what moved.
     for key, names in lists.items():
         if key in entry and names != entry[key]:
@@ -151,10 +183,20 @@ def bump(lock: Path, report: Report) -> bool:
             for key, released in (("commands", release.commands), ("agents", release.agents)):
                 if key in entry:
                     lists[key] = selection(entry, key, released, report)
-            blocks[index] = rewrite(blocks[index], entry, release, lists)
+            roots = moved_roots(entry, release)
+            blocks[index] = rewrite(blocks[index], entry, release, lists, roots)
             added = sorted(set(skills) - set(entry["skills"]))
             dropped = sorted(set(entry["skills"]) - set(skills))
-            change = "; ".join(filter(None, [f"added {', '.join(added)}" if added else "", f"dropped {', '.join(dropped)}" if dropped else ""]))
+            change = "; ".join(
+                filter(
+                    None,
+                    [
+                        f"added {', '.join(added)}" if added else "",
+                        f"dropped {', '.join(dropped)}" if dropped else "",
+                        *(f"{ROOTS[key][0]} moved to {root}/" for key, root in roots.items()),
+                    ],
+                )
+            )
             report.moved.append(f"`{entry['id']}` {entry['tag']} → {tag}" + (f" ({change})" if change else ""))
     updated = header + "".join(blocks)
     if updated == text:

@@ -24,6 +24,14 @@ demonstrable ambiguity, mismatch, or specification violation, not cosmetic consi
 | awake-architecture-auditor | Module boundaries and framework-versus-game decisions |
 | awake-docs-maintainer | Documentation, entrypoint, and catalog consistency |
 
+## Layout and naming
+
+Personas live in `agents/` and commands in `commands/`, beside `skills/` and never inside a skill:
+a skill's own `agents/` folder holds only its Codex metadata (`openai.yaml`). Name a persona
+`awake-<domain>-<role>.md` with a professional role suffix (`engineer`, `auditor`, `director`,
+`designer`, `producer`, `maintainer`), never an informal one such as `*-dev`. Start a new persona from
+[the persona template](templates/awake-domain-engineer.template.md).
+
 ## Model tiers
 
 Use flagship-coding for deep backend and cross-module work, balanced-coding for everyday
