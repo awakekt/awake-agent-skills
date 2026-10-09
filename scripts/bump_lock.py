@@ -222,9 +222,13 @@ def main() -> int:
         print(f"lockfile bump failed: {error}", file=sys.stderr)
         return 1
     summary = report.markdown()
-    print(summary if summary.strip() else "nothing to report")
     if args.summary:
         Path(args.summary).write_text(summary, encoding="utf-8")
+    # The report has non-ASCII (→), which a Windows console's code page may not encode; print what
+    # it can rather than fail after the lockfile is already written.
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(errors="replace")
+    print(summary if summary.strip() else "nothing to report")
     print("lockfile updated" if changed else "lockfile unchanged")
     # A source that could not be checked fails the run, after the reachable ones were moved.
     return 1 if report.failed else 0
