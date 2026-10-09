@@ -24,8 +24,10 @@ Each project pins the bundles it needs in `.agents/skills.lock.toml`:
 |---|---|
 | awake | agent skills, game skills |
 | awake-studio | agent skills, game skills, studio skills |
-| awake-plugin-template | game skills |
-| awake-template and new games | game skills |
+
+The starter templates (awake-template, awake-project-template and awake-plugin-template) ship no
+agent setup: their files land in every project made from them. A game, tool or plugin project
+that wants the game skills pins awake-game-agent-skills itself.
 
 ## Skills
 
