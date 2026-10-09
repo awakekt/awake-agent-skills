@@ -2,4 +2,7 @@
 name = "awake-agent-skills"
 license = "Apache-2.0"
 namespace = "awake"
-persona_dir = "skills/awake/agents"
+# Top-level, beside skills/: a skill's own agents/ folder holds only its Codex metadata (openai.yaml).
+# bump_lock.py reads both from each release, so a consumer's agent_root and command_root follow them.
+persona_dir = "agents"
+command_dir = "commands"

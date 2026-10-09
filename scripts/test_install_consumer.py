@@ -6,6 +6,7 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import shutil
+import stat
 import subprocess
 import tempfile
 from pathlib import Path
@@ -42,8 +43,7 @@ class TestInstaller:
         run("git", "commit", "--quiet", "-m", "fixture", cwd=self.source)
         self.commit = run("git", "rev-parse", "HEAD", cwd=self.source)
         run("git", "tag", "-a", "v0.0.0", "-m", "fixture", cwd=self.source)
-        archive = subprocess.check_output(["git", "archive", "--format=tar", self.commit], cwd=self.source)
-        self.digest = hashlib.sha256(archive).hexdigest()
+        self.digest = installer.archive_digest(self.source, self.commit)
         run("git", "commit", "--quiet", "--allow-empty", "-m", "follow-up", cwd=self.source)
         run("git", "tag", "-a", "v0.0.1", "-m", "follow-up", cwd=self.source)
         self.consumer.mkdir()
@@ -68,7 +68,7 @@ class TestInstaller:
                     "[[source]]",
                     'id = "fixture"',
                     'kind = "maintained-core"',
-                    f'source = "{self.source}"',
+                    f'source = "{self.source.as_posix()}"',
                     f'tag = "{tag}"',
                     f'commit = "{commit or self.commit}"',
                     f'archive_sha256 = "{digest or self.digest}"',
@@ -118,6 +118,10 @@ class TestInstaller:
         lock = self.lock()
         installer.install(self.consumer, lock)
         cache = installer.cache_path(self.consumer, installer.load_lock(lock)[0])
+        # Git writes its objects read-only, and Windows refuses to delete a read-only file.
+        for path in (cache / ".git").rglob("*"):
+            if path.is_file():
+                path.chmod(stat.S_IREAD | stat.S_IWRITE)
         shutil.rmtree(cache / ".git")
         assert installer.install(self.consumer, lock) == []
         try:
@@ -133,8 +137,7 @@ class TestInstaller:
         run("git", "commit", "--quiet", "-am", "update", cwd=self.source)
         run("git", "tag", "-a", "v0.0.2", "-m", "update", cwd=self.source)
         commit = run("git", "rev-parse", "HEAD", cwd=self.source)
-        archive = subprocess.check_output(["git", "archive", "--format=tar", commit], cwd=self.source)
-        lock = self.lock(tag="v0.0.2", commit=commit, digest=hashlib.sha256(archive).hexdigest())
+        lock = self.lock(tag="v0.0.2", commit=commit, digest=installer.archive_digest(self.source, commit))
         assert {state for state, _ in installer.status(self.consumer, installer.load_lock(lock))} == {"outdated"}
         installer.install(self.consumer, lock)
         assert "v2" in (self.consumer / ".claude" / "skills" / "example" / "SKILL.md").read_text(encoding="utf-8")
@@ -188,3 +191,28 @@ class TestInstaller:
             pass
         else:
             raise AssertionError("installer accepted a wrong commit")
+
+    def test_a_pin_verifies_under_windows_line_ending_settings(self, monkeypatch) -> None:
+        lock = self.lock()
+        # Git for Windows turns core.autocrlf on, and `git archive` applies it to file contents.
+        for index, (key, value) in enumerate((("core.autocrlf", "true"), ("core.eol", "crlf"))):
+            monkeypatch.setenv(f"GIT_CONFIG_KEY_{index}", key)
+            monkeypatch.setenv(f"GIT_CONFIG_VALUE_{index}", value)
+        monkeypatch.setenv("GIT_CONFIG_COUNT", "2")
+        converted = subprocess.check_output(["git", "archive", "--format=tar", self.commit], cwd=self.source)
+        assert hashlib.sha256(converted).hexdigest() != self.digest  # the settings do change the bytes
+
+        installer.install(self.consumer, lock)
+
+        assert (self.consumer / ".claude" / "skills" / "example" / "SKILL.md").is_file()
+
+
+def test_a_windows_link_target_compares_equal_to_the_path_it_was_made_with(monkeypatch) -> None:
+    # Windows reports a symlink's target in extended-length form; left as is, every installed
+    # entry reads as outdated and no dropped skill is ever found stale.
+    monkeypatch.setattr(installer.os, "readlink", lambda _: "\\\\?\\C:\\cache\\skills\\example")
+    assert installer.link_target(Path("link")) == Path("C:\\cache\\skills\\example")
+    monkeypatch.setattr(installer.os, "readlink", lambda _: "\\\\?\\UNC\\host\\share\\skills\\example")
+    assert installer.link_target(Path("link")) == Path("\\\\host\\share\\skills\\example")
+    monkeypatch.setattr(installer.os, "readlink", lambda _: "/cache/skills/example")
+    assert installer.link_target(Path("link")) == Path("/cache/skills/example")

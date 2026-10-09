@@ -4,12 +4,12 @@ description: Route Awake Core maintenance (engine, renderer, UI system, platform
 license: Apache-2.0
 metadata:
   author: awake
-  last-updated: '2026-10-03'
+  last-updated: '2026-10-09'
 ---
 
 # Awake Maintainer Routing
 
-Pick the maintainer skill for the area you are changing, or an Awake persona in [agents/](agents/)
+Pick the maintainer skill for the area you are changing, or an Awake persona (an `awake-*` agent)
 for cross-cutting work; the [agent catalog](../../docs/agent-catalog.md) lists each persona's scope.
 
 - Building a game, tool or editor plugin on Awake: the

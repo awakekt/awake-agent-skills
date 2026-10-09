@@ -11,6 +11,8 @@ every Awake project uses. Building a game on Awake? Use
 |---|---|---|
 | [awakekt/awake](https://github.com/awakekt/awake) | Public, Apache-2.0 | Awake Core: the engine runtime and the editor plugin contract |
 | [awakekt/awake-template](https://github.com/awakekt/awake-template) | Public | The starting project for a new game |
+| [awakekt/awake-plugin-template](https://github.com/awakekt/awake-plugin-template) | Public | The starting project for an editor plugin, built only on Core's plugin contract |
+| [awakekt/awake-project-template](https://github.com/awakekt/awake-project-template) | Public | The app that plays an Awake Studio project; Studio's app export is built on it |
 | awakekt/awake-studio | Private, AGPL-3.0 or commercial | Awake Studio: the editor app, its editor library and commercial plugins |
 | [awakekt/awake-agent-skills](https://github.com/awakekt/awake-agent-skills) | Public, Apache-2.0 | Skills for maintaining Awake Core, maintainer personas, and the skill installer |
 | [awakekt/awake-game-agent-skills](https://github.com/awakekt/awake-game-agent-skills) | Public, Apache-2.0 | Skills for building games, tools and editor plugins on Awake |
@@ -22,6 +24,7 @@ Each project pins the bundles it needs in `.agents/skills.lock.toml`:
 |---|---|
 | awake | agent skills, game skills |
 | awake-studio | agent skills, game skills, studio skills |
+| awake-plugin-template | game skills |
 | awake-template and new games | game skills |
 
 ## Skills
@@ -57,11 +60,19 @@ verify and deploy the exact pinned revisions:
     git clone https://github.com/awakekt/awake-agent-skills .agents/vendor/awake-agent-skills-bootstrap
     python3 .agents/vendor/awake-agent-skills-bootstrap/scripts/install_consumer.py --project .
 
+It needs Python 3.11 or newer. On Windows, `python3` is often the Microsoft Store placeholder; run
+the same command with `py -3` instead.
+
 The installer caches each pinned source under `.agents/vendor/`, checks its tag, commit and archive
 digest, and deploys only the declared skills, commands and personas to `.agents/skills`,
 `.agents/commands` and `.agents/agents`, mirrored into `.claude/` for Claude Code. Keep all six
 directories gitignored. A source declares personas with `agent_root`, `agents` and
-`agents_target = ".agents/agents"`.
+`agents_target = ".agents/agents"`, and commands with `command_root`, `commands` and
+`commands_target = ".agents/commands"`.
+
+Every Awake bundle keeps its personas in a top-level `agents/` and its commands in a top-level
+`commands/`, beside `skills/`: a skill's own `agents/` folder holds only its Codex metadata
+(`openai.yaml`). Each bundle's `bundle.toml` names both folders (`persona_dir`, `command_dir`).
 
 Re-running is safe: it does nothing when every deployment matches the lockfile, relinks after a
 bump, removes entries it created for dropped skills, and never replaces a directory it did not
@@ -74,7 +85,9 @@ create.
 
 `bump_lock.py` moves every source to its newest stable `vX.Y.Z` tag and writes the commit and
 digest the installer verifies. A maintained bundle's skill, command and persona lists follow the
-release; a vendor keeps its selection and reports new names for review. Run it from a scheduled
+release; a vendor keeps its selection and reports new names for review. When a release's
+`bundle.toml` moves its persona or command folder, the bump rewrites `agent_root` or `command_root`
+to match. Run it from a scheduled
 job that opens a pull request:
 
     python3 .agents/vendor/awake-agent-skills-bootstrap/scripts/bump_lock.py --project . --summary bump.md
