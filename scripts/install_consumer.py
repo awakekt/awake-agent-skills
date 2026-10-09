@@ -108,10 +108,21 @@ def deployments(project: Path, entry: dict) -> list[tuple[Path, Path, list[str]]
     return result
 
 
+def link_target(target: Path) -> Path:
+    """Where the symlink [target] points. Windows reports it in extended-length form (\\\\?\\C:\\...),
+    which never equals the path it was created with."""
+    link = os.readlink(target)
+    if link.startswith("\\\\?\\UNC\\"):
+        link = "\\\\" + link[len("\\\\?\\UNC\\"):]
+    elif link.startswith("\\\\?\\"):
+        link = link[len("\\\\?\\"):]
+    return Path(link)
+
+
 def installed_origin(target: Path) -> Path | None:
     """The source an installer-created entry points at, or None for anything else."""
     if target.is_symlink():
-        return Path(os.readlink(target))
+        return link_target(target)
     marker = target / MARKER
     if target.is_dir() and marker.is_file():
         return Path(marker.read_text(encoding="utf-8").strip())

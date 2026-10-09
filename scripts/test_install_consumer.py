@@ -6,6 +6,7 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import shutil
+import stat
 import subprocess
 import tempfile
 from pathlib import Path
@@ -68,7 +69,7 @@ class TestInstaller:
                     "[[source]]",
                     'id = "fixture"',
                     'kind = "maintained-core"',
-                    f'source = "{self.source}"',
+                    f'source = "{self.source.as_posix()}"',
                     f'tag = "{tag}"',
                     f'commit = "{commit or self.commit}"',
                     f'archive_sha256 = "{digest or self.digest}"',
@@ -118,6 +119,10 @@ class TestInstaller:
         lock = self.lock()
         installer.install(self.consumer, lock)
         cache = installer.cache_path(self.consumer, installer.load_lock(lock)[0])
+        # Git writes its objects read-only, and Windows refuses to delete a read-only file.
+        for path in (cache / ".git").rglob("*"):
+            if path.is_file():
+                path.chmod(stat.S_IREAD | stat.S_IWRITE)
         shutil.rmtree(cache / ".git")
         assert installer.install(self.consumer, lock) == []
         try:
@@ -188,3 +193,14 @@ class TestInstaller:
             pass
         else:
             raise AssertionError("installer accepted a wrong commit")
+
+
+def test_a_windows_link_target_compares_equal_to_the_path_it_was_made_with(monkeypatch) -> None:
+    # Windows reports a symlink's target in extended-length form; left as is, every installed
+    # entry reads as outdated and no dropped skill is ever found stale.
+    monkeypatch.setattr(installer.os, "readlink", lambda _: "\\\\?\\C:\\cache\\skills\\example")
+    assert installer.link_target(Path("link")) == Path("C:\\cache\\skills\\example")
+    monkeypatch.setattr(installer.os, "readlink", lambda _: "\\\\?\\UNC\\host\\share\\skills\\example")
+    assert installer.link_target(Path("link")) == Path("\\\\host\\share\\skills\\example")
+    monkeypatch.setattr(installer.os, "readlink", lambda _: "/cache/skills/example")
+    assert installer.link_target(Path("link")) == Path("/cache/skills/example")
