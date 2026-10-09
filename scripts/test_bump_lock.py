@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import importlib.util
+import io
 import subprocess
 import sys
 import tempfile
@@ -236,6 +237,20 @@ class TestBump:
         assert entry["agents"] == ["auditor.md"]
         installer.install(self.consumer, lock)
         assert (self.consumer / ".agents" / "agents" / "auditor.md").is_file()
+
+    def test_the_report_prints_on_a_console_that_cannot_encode_it(self, monkeypatch) -> None:
+        lock = self.lock("maintained-core")
+        summary = self.root / "summary.md"
+        # A Windows console's code page, which has no "→".
+        console = io.TextIOWrapper(io.BytesIO(), encoding="cp1252")
+        monkeypatch.setattr(sys, "stdout", console)
+        monkeypatch.setattr(sys, "argv", ["bump_lock.py", "--project", str(self.consumer), "--lock", lock.name, "--summary", str(summary)])
+
+        assert bumper.main() == 0
+
+        console.flush()
+        assert b"lockfile updated" in console.buffer.getvalue()
+        assert "v0.0.9 → v0.0.10" in summary.read_text(encoding="utf-8")
 
     def test_an_unreachable_source_is_reported_not_skipped_silently(self) -> None:
         lock = self.lock("maintained-core", source=self.root / "missing")
