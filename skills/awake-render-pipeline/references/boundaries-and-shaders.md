@@ -2,11 +2,15 @@
 
 ## Shader source
 
-UI shaders are authored in the shared ASL definitions in awake:asset:shader-pack, not independently
-in Vulkan GLSL and WebGPU WGSL. After changing ASL, run
-./gradlew :awake:asset:shader-pack:generateAslShaders. Generated shader resources are reviewable
-outputs, not authoring locations. Compare uniforms, locations, varyings, bindings, and entrypoints
-with live backend resources before changing a definition. If the shared definition cannot preserve
+Shaders, UI and 3D, are authored in the shared ASL definitions in awake:asset:shader-pack, not
+independently in Vulkan GLSL and WebGPU WGSL. Nothing is generated into the repository:
+`aslShaderSet` (awake:asset:shaders, `ShaderProgramResources.kt`) emits a definition's WGSL in
+memory when its shader set is built, WebGPU runs that WGSL, and Vulkan's `VulkanShaderResolver`
+translates it to SPIR-V with naga at runtime. After changing ASL, run
+`./gradlew :awake:asset:shader-pack:desktopTest` and `./gradlew :awake:engine:render:parity:desktopTest`,
+which draws through both backends; `packShaderPair("<name>")` in awake:backend:vulkan's desktop
+tests compiles one pack shader to SPIR-V on its own. Compare uniforms, locations, varyings,
+bindings, and entrypoints with live backend resources before changing a definition. If the shared definition cannot preserve
 an existing ABI, record the gap instead of silently generating an incompatible shader.
 
 If an existing shader cannot yet be represented without changing its ABI, record the migration

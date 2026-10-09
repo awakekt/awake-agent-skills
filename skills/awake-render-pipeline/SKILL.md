@@ -4,7 +4,7 @@ description: Structure Awake render features, pipelines, materials, and cross-ba
 license: Apache-2.0
 metadata:
   author: awake
-  last-updated: '2026-09-20'
+  last-updated: '2026-10-09'
 ---
 
 # Awake render pipeline guidance
