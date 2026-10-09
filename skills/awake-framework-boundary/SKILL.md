@@ -49,8 +49,8 @@ Awake enforces strict boundaries across three distinct architectural layers:
    actions, and which keys, buttons or touch controls trigger each, and whether it fires on press,
    while held or as a toggle, is one binding table in scene data. A new verb is a new action in
    that table, never a key constant or a per-verb key or mode field (`runKey`) on a gameplay
-   component. `PlayerInputSystem`'s fixed keys and `movement_control`'s `runKey` and `runMode`
-   predate this ([awake#587](https://github.com/awakekt/awake/issues/587)); do not add to them.
+   component. A scene binds its actions in `input_actions`, and Core reads them through
+   `InputActions` (`awake:core:input`).
 8. Movement that needs ground, slopes or collisions goes through the physics character controller
    binding (`scene:physics`). A hand-rolled gravity or ground-snap system is game code, however
    small.
