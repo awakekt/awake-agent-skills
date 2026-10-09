@@ -43,9 +43,14 @@ Awake enforces strict boundaries across three distinct architectural layers:
    authored world policy.
 
 7. Core ships mechanisms, not feel. Gameplay tuning (move and jump speed, gravity, camera follow
-   distance and pitch, input bindings, on-screen control layout) is never a constant in Core code.
-   It is a field on a scene component with a neutral default, and the template or game authors the
-   value in scene data.
+   distance and pitch, on-screen control layout) is never a constant in Core code. It is a field on
+   a scene component with a neutral default, and the template or game authors the value in scene
+   data. Input bindings are the exception to one field per value: a Core system reads named
+   actions, and which keys, buttons or touch controls trigger each, and whether it fires on press,
+   while held or as a toggle, is one binding table in scene data. A new verb is a new action in
+   that table, never a key constant or a per-verb key or mode field (`runKey`) on a gameplay
+   component. `PlayerInputSystem`'s fixed keys and `movement_control`'s `runKey` and `runMode`
+   predate this ([awake#587](https://github.com/awakekt/awake/issues/587)); do not add to them.
 8. Movement that needs ground, slopes or collisions goes through the physics character controller
    binding (`scene:physics`). A hand-rolled gravity or ground-snap system is game code, however
    small.

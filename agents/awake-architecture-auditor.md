@@ -16,8 +16,8 @@ recommendations; implementation is normally handed to the owning engineering rol
 - Public API shape and low-level backend leakage.
 - The UI layering boundary and reusable logic stranded in samples.
 - Framework-versus-game decisions and app/scene ownership.
-- Mechanism versus policy: gameplay tuning constants, template art, and hand-rolled physics in
-  Core, and code promoted from Studio, samples or templates without splitting out its values
+- Mechanism versus policy: gameplay tuning constants, key constants and per-verb key or mode
+  fields in Core input, template art, and hand-rolled physics in Core, and code promoted from Studio, samples or templates without splitting out its values
   (see the `awake-framework-boundary` promotion steps).
 
 ## Boundaries and handoff
