@@ -8,7 +8,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: awake
-  last-updated: '2026-09-20'
+  last-updated: '2026-10-09'
 ---
 
 # Vulkan Backend Engineering in Awake
@@ -45,13 +45,14 @@ Every Vulkan creation path must have an explicit, symmetrical destruction path:
 - Avoid the "backing surface never resized" failure mode by synchronizing surface dimensions with the native window size on each frame boundary.
 - For swapchain fundamentals, consult [vulkan-tutorial.com](https://vulkan-tutorial.com/).
 
-## 4. UI Shader Artifacts
+## 4. Shader Source
 
-UI shader source is owned by ASL in `:awake:asset:shader-pack`. Do not hand-edit Vulkan GLSL or
-SPIR-V for a UI shader. Change the matching ASL definition, run
-`./gradlew :awake:asset:shader-pack:generateAslShaders`, and verify the generated SPIR-V with
-`./gradlew :awake:backend:vulkan:verifyShaderBinaries` plus a headless pixel test. ASL emits
-WGSL; naga is the sole WGSL-to-SPIR-V translation step, so Vulkan-specific shader math is an
+Shader source, UI and 3D, is owned by ASL in `:awake:asset:shader-pack`. Do not hand-write Vulkan
+GLSL or SPIR-V for a pack shader. Change the matching ASL definition: `VulkanShaderResolver`
+translates its WGSL to SPIR-V with naga at runtime, so there is nothing to regenerate. Check that it
+compiles with `packShaderPair("<name>")` in `awake/backend/vulkan`'s desktop tests and that it draws
+with `./gradlew :awake:engine:render:parity:desktopTest`. ASL emits WGSL; naga is the sole
+WGSL-to-SPIR-V translation step, so Vulkan-specific shader math is an
 explicit exception that must be documented at the definition site.
 
 ## 5. Verification & Regression Gate

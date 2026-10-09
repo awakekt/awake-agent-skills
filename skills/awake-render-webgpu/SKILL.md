@@ -7,7 +7,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: awake
-  last-updated: '2026-09-20'
+  last-updated: '2026-10-09'
 ---
 
 # WebGPU Backend Engineering in Awake
@@ -40,11 +40,11 @@ ledger is empty. Before adding a content-shaped class here, read
 
 - WebGPU and Vulkan backends share common uniform layout definitions in `awake:asset:shaders` (`LitShadowUniformLayout`, `TexturedUniformLayout`).
 - **Rule**: Any uniform layout change must be verified against both backends to ensure binding indices and byte alignment match perfectly.
-- UI shader source is authored in `:awake:asset:shader-pack` ASL and emitted as WGSL. Do not
-  hand-edit `src/wasmJsMain/resources/assets/shader/webgpu/ui_*.wgsl`; update the ASL definition,
-  run `./gradlew :awake:asset:shader-pack:generateAslShaders`, and run the ASL drift tests.
-  Generated WGSL is also the input to naga for Vulkan, keeping the two backends on one shader
-  definition.
+- Shader source, UI and 3D, is authored in `:awake:asset:shader-pack` ASL and emitted as WGSL in
+  memory by `aslShaderSet`; no WGSL is generated into the repository. Change the ASL definition,
+  then run `./gradlew :awake:asset:shader-pack:desktopTest` and
+  `./gradlew :awake:engine:render:parity:desktopTest`. The same WGSL is naga's input for Vulkan,
+  keeping the two backends on one shader definition.
 - Every resource-path shader declaration must provide its `bindingsByGroup` map explicitly. The
   WebGPU factory rejects missing metadata, and pipeline code must never infer group usage by
   searching WGSL text for `@group(...)`.
