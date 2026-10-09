@@ -60,6 +60,16 @@ def load_lock(path: Path) -> list[dict]:
     return entries
 
 
+def archive_digest(repo: Path, commit: str) -> str:
+    """The SHA-256 of [commit]'s tar archive, the same on every machine. `git archive` applies the
+    local line-ending settings to file contents, and Git for Windows turns core.autocrlf on, so
+    both are pinned to the repository's own bytes. bump_lock.py computes it the same way."""
+    archive = subprocess.check_output(
+        ["git", "-c", "core.autocrlf=false", "-c", "core.eol=lf", "archive", "--format=tar", commit], cwd=repo
+    )
+    return hashlib.sha256(archive).hexdigest()
+
+
 def cache_path(project: Path, entry: dict) -> Path:
     return project / ".agents" / "vendor" / f"{entry['id']}@{entry['commit']}"
 
@@ -82,8 +92,7 @@ def cache_source(project: Path, entry: dict) -> Path:
     tag_commit = run("git", "rev-list", "-n", "1", entry["tag"], cwd=cache)
     if tag_commit != entry["commit"]:
         raise ValueError(f"{entry['id']}: tag does not resolve to the pinned commit")
-    archive = subprocess.check_output(["git", "archive", "--format=tar", entry["commit"]], cwd=cache)
-    if hashlib.sha256(archive).hexdigest() != entry["archive_sha256"]:
+    if archive_digest(cache, entry["commit"]) != entry["archive_sha256"]:
         raise ValueError(f"{entry['id']}: archive digest does not match lockfile")
     return cache
 

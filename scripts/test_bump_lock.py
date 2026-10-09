@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import hashlib
 import importlib.util
 import subprocess
 import sys
@@ -89,8 +88,7 @@ class TestBump:
     def pin(self, tag: str, source: Path | None = None) -> tuple[str, str]:
         source = source or self.source
         commit = run("git", "rev-list", "-n", "1", tag, cwd=source)
-        archive = subprocess.check_output(["git", "archive", "--format=tar", commit], cwd=source)
-        return commit, hashlib.sha256(archive).hexdigest()
+        return commit, installer.archive_digest(source, commit)
 
     def persona_lock(self, source: Path, agent_root: str | None) -> Path:
         """A lock on [source] v1.0.0 declaring one persona; [agent_root] None leaves the installer default."""

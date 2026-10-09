@@ -79,7 +79,11 @@ def fetch_release(entry: dict, tag: str, workdir: Path) -> Release:
     checkout = workdir / entry["id"]
     git("clone", "--quiet", "--no-checkout", "--branch", tag, entry["source"], str(checkout))
     commit = git("rev-list", "-n", "1", tag, cwd=checkout)
-    archive = subprocess.check_output(["git", "archive", "--format=tar", commit], cwd=checkout)
+    # Line-ending settings pinned exactly as install_consumer.archive_digest does, so a pin written on
+    # Windows verifies everywhere.
+    archive = subprocess.check_output(
+        ["git", "-c", "core.autocrlf=false", "-c", "core.eol=lf", "archive", "--format=tar", commit], cwd=checkout
+    )
     files = git("ls-tree", "-r", "--name-only", commit, cwd=checkout).splitlines()
     skill_root = entry["skill_root"].rstrip("/") + "/"
     skills = sorted(
