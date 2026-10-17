@@ -1,0 +1,16 @@
+{
+  "name": "awake-agent-skills",
+  "description": "Skills, maintainer personas and commands for working on Awake Core: the engine, renderer, UI system, platform layer and releases.",
+  "owner": {
+    "name": "Awake",
+    "url": "https://github.com/awakekt"
+  },
+  "plugins": [
+    {
+      "name": "awake-agent-skills",
+      "source": "./",
+      "description": "Skills, maintainer personas and commands for working on Awake Core: the engine, renderer, UI system, platform layer and releases.",
+      "version": "0.3.1"
+    }
+  ]
+}

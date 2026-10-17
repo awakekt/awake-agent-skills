@@ -1,3 +1,8 @@
+---
+name: review-ui-snapshots
+description: Analyze the ui-headless pixel-baseline UI snapshot gallery for legibility and occlusion issues using vision on the raw PNGs.
+---
+
 # /awake:review-ui-snapshots $ARGUMENTS
 
 Analyze `awake:engine:ui:ui-headless`' pixel-baseline UI snapshot gallery for legibility/occlusion
