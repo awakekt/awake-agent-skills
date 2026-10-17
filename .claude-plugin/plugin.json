@@ -1,0 +1,34 @@
+{
+  "name": "awake-agent-skills",
+  "version": "0.3.1",
+  "description": "Skills, maintainer personas and commands for working on Awake Core: the engine, renderer, UI system, platform layer and releases.",
+  "author": {
+    "name": "Ron June Valdoz",
+    "url": "https://github.com/awakekt"
+  },
+  "homepage": "https://github.com/awakekt/awake-agent-skills",
+  "repository": "https://github.com/awakekt/awake-agent-skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "awake",
+    "game-engine",
+    "kotlin-multiplatform",
+    "rendering",
+    "ui",
+    "agent-skills"
+  ],
+  "commands": [
+    "./commands/compare-ui-component-crops.md",
+    "./commands/review-ui-snapshots.md",
+    "./commands/verify-ui-parity.md"
+  ],
+  "agents": [
+    "./agents/awake-architecture-auditor.md",
+    "./agents/awake-docs-maintainer.md",
+    "./agents/awake-engine-core-engineer.md",
+    "./agents/awake-game-runtime-engineer.md",
+    "./agents/awake-platform-release-engineer.md",
+    "./agents/awake-render-backend-engineer.md",
+    "./agents/awake-ui-engineer.md"
+  ]
+}

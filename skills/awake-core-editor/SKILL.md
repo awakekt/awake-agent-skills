@@ -1,6 +1,9 @@
 ---
 name: awake-core-editor
-description: Maintain the vendor-neutral editor plugin contract in Awake Core (:awake:editor:contract): its layer boundary, canonical names and verification. Use before changing an editor extension point or provider contract. Plugin authors use awake-editor-plugin-authoring.
+description: >
+  Maintain the vendor-neutral editor plugin contract in Awake Core (:awake:editor:contract): its layer
+  boundary, canonical names and verification. Use before changing an editor extension point or
+  provider contract. Plugin authors use awake-editor-plugin-authoring.
 license: Apache-2.0
 metadata:
   author: awake

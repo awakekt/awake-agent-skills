@@ -1,3 +1,8 @@
+---
+name: compare-ui-component-crops
+description: Run the semantic component crop/parity workflow for an Awake UI component when a full showcase screenshot is too broad to diagnose a regression.
+---
+
 # /awake:compare-ui-component-crops $ARGUMENTS
 
 Run the semantic component crop/parity workflow. Use this when a full showcase screenshot is

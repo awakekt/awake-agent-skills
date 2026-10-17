@@ -54,6 +54,17 @@ that wants the game skills pins awake-game-agent-skills itself.
 Maintainer personas are listed in [docs/agent-catalog.md](docs/agent-catalog.md). Pinned KMP
 vendor skills come from `ronjunevaldoz/kmp-agent-skills`; never edit a deployed copy.
 
+## Install in Claude Code
+
+Claude Code does not read `.agents/skills`. This repository is also a Claude Code plugin marketplace,
+so Claude Code loads its skills, maintainer personas (agents) and commands directly:
+
+    claude plugin marketplace add awakekt/awake-agent-skills
+    claude plugin install awake-agent-skills@awake-agent-skills
+
+Skills are namespaced by the plugin, for example `awake-agent-skills:<skill>`. Update with
+`claude plugin update awake-agent-skills@awake-agent-skills`.
+
 ## Install in a project
 
 A project pins its bundles in `.agents/skills.lock.toml`. Bootstrap this installer, then let it
