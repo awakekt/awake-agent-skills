@@ -41,6 +41,11 @@ and name its trigger.
   its GitHub URL. Never reference a local path or a deployed `.agents/` copy **(checked)**.
 - Cite real module, type and file names from the current code. A skill that describes code which
   moved is a bug; fix it in the same change that moves the code.
+- `scripts/check_code_references.py` checks every module, repository path and type a skill names in
+  inline backticks against Awake Core, on each PR and daily against Core's `main`. Names a skill
+  declares in its own code blocks are treated as examples. List a deliberate non-Core name (Kotlin
+  stdlib, AndroidX, a native API) in `code-references.ignore`; never add new drift to
+  `code-references.baseline`, which only records drift that existed before the check.
 - No investigation narration, dated incident stories, or competitor and third-party game names.
 
 ## Register it
