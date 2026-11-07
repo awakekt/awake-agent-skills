@@ -21,7 +21,7 @@ metadata:
 Awake enforces strict boundaries across three distinct architectural layers:
 
 1. **Layer 1: Awake Core Engine (`awakekt/awake`)** (Apache 2.0):
-   Runtime engine libraries required to compile, execute, and ship games on Desktop, iOS, Android, and WASM (`:awake:scene`, `:awake:physics`, `:awake:render`, `:awake:ui:shadcn`, `:awake:project`, etc.).
+   Runtime engine libraries required to compile, execute, and ship games on Desktop, iOS, Android, and WASM (`:awake:scene`, `:awake:physics`, `:awake:engine:render`, `:awake:ui:shadcn`, `:awake:project`, etc.).
 2. **Layer 2: Awake Core Editor (`awakekt/awake`, `:awake:editor:contract`)** (Apache 2.0):
    Public, vendor-neutral editor contracts and extension points (`com.awakekt.awake.editor:contract`). Enables any developer or toolmaker to author editor plugins without closed-source Studio dependencies.
 3. **Layer 3: Awake Studio Pro (`awakekt/awake-studio`)** (Commercial):
@@ -92,9 +92,10 @@ template's choices. Before moving a file:
 5. Record the promotion under rule 5 in the PR, naming what stayed behind as data.
 
 Worked example (2026-09): a first project player moved a third-person template's camera numbers,
-a flat-floor jump, a checkered arena mesh and a fixed touch-control layout into
-`awake:scene:player`. It was reworked into data-driven scene components (camera rig, character
-controller, canvas controls), a thin project runtime, and template-owned assets.
+a flat-floor jump, a checkered arena mesh and a fixed touch-control layout into one scene
+module. It was reworked into data-driven scene components (the camera rig in `awake:scene:controls`,
+the character controller in `awake:scene:character`, canvas controls in `awake:scene:canvas`), a thin
+project runtime (`awake:project:runtime`), and template-owned assets.
 
 ## What Belongs in `awake:scene:*` (The Scene-Binding Boundary)
 

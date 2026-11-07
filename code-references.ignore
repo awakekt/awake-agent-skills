@@ -20,3 +20,12 @@ VkInstance
 # Icon packs generated at build time by the icon-codegen plugin, so not in Core's sources.
 HeroIcons
 LucideIcons
+# Awake Studio (Layer 3, a separate repository): named on purpose, never declared in Core
+StudioPluginPipeline    # Studio's runtime plugin loader
+PluginPreflightChecker  # Studio's plugin preflight, in its Pro pipeline
+StudioFramePerfProbeTest # Studio's frame timing probe, cited by Core's FrameSpans KDoc
+# Retired editor names the core-editor skill forbids bringing back
+EditorDock
+EntityPreset
+# Build output, never in the tree
+awake/ui/shadcn/build/reports/compose-preview/

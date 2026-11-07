@@ -115,9 +115,6 @@ reaches consumers' generated code on their next Core upgrade.
 - A change that alters output for existing SVGs moves every pack. Diff the generated files before
   and after rather than trusting the tests alone.
 
-`packedImageVector` (`awake/compose/ui/.../vector/PackedImageVector.kt`) still decodes a packed
-string form, pinned by `PackedImageVectorParityTest`; the generator does not emit it.
-
 ## How An Icon Renders
 
 `ShadcnIcon` and `ShadcnCheckbox` draw through `rememberVectorPainter`, so `VectorPainter.draw`:

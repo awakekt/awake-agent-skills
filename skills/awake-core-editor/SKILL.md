@@ -16,7 +16,7 @@ metadata:
 The Awake Engine ecosystem is structured into three strictly decoupled architectural layers:
 
 1. **Layer 1: Awake Core Engine (`awakekt/awake`)** (Apache 2.0):
-   Runtime libraries required to compile, execute, and ship games on Desktop, iOS, Android, and WASM (`:awake:scene`, `:awake:physics`, `:awake:render`, `:awake:ui:shadcn`, `:awake:project`, etc.).
+   Runtime libraries required to compile, execute, and ship games on Desktop, iOS, Android, and WASM (`:awake:scene`, `:awake:physics`, `:awake:engine:render`, `:awake:ui:shadcn`, `:awake:project`, etc.).
 2. **Layer 2: Awake Core Editor (`awakekt/awake`, `:awake:editor:contract`)** (Apache 2.0):
    Public, vendor-neutral editor contracts, provider extension points, and project plugin metadata published under `com.awakekt.awake.editor:contract`. Allows third-party developers, community creators, and commercial tools to write plugins against an open-source standard.
 3. **Layer 3: Awake Studio Pro (`awakekt/awake-studio`)** (Commercial):

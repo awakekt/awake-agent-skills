@@ -32,12 +32,12 @@ A capability that already has a home getting another one. The repo's audit calls
 
 > **One canonical mechanism per concern.** Look the registry up before drawing it yourself.
 
-Live example: the checkbox hand-builds a checkmark from transcribed coordinates
-(`ShapePainter.drawCheckmark`) while `UiIcons`/`HeroIcons.check` already holds a generated
-vector — and the dropdown chevron in the same file family renders through the registry. Note
-this also evades `awake-ui-icons`' hand-transcription ban purely by being typed `UiPath`
-instead of `UiImageVector`, so state that rule by content, not type: **if it is a glyph, it
-comes from the registry; being a path is not an exemption.**
+Example, now fixed: the checkbox once hand-built its checkmark from transcribed coordinates
+while the icon registry already held a generated vector, and the dropdown chevron beside it
+already rendered through the registry. `ShadcnCheckbox` now draws `ShadcnIcons.check` through
+`rememberVectorPainter`. The hand-built mark also evaded `awake-ui-icons`' hand-transcription
+ban by being typed as a raw path instead of an `ImageVector`, so state that rule by content, not
+type: **if it is a glyph, it comes from the registry; being a path is not an exemption.**
 
 ## Which reference to check a control against
 
@@ -66,27 +66,24 @@ in. That is a debt, not a pattern to copy.
 The exception is genuine *composition*: a branded arrangement of existing primitives with no new
 behaviour is correctly design-system-only.
 
-## Headless consumes `Style`, not a theme recipe
+## Foundation consumes `Style`, not a theme recipe
 
-Runtime-free theme value contracts live in `ui-api`; `ui-core` owns their runtime locals and
-the neutral `CoreUiTheme` fallback. Headless does not reach into `UiContext` or `Local*` stacks
-itself and does not expose `provideTheme`/`provideTextStyle`; it consumes Core's scope-level
-accessors and generic `Style` values (and slots where appropriate), then applies the interaction
-state supplied by that style.
+`:awake:compose:foundation` owns the neutral styling contract: `Style`, `StyleState` and
+`Modifier.styleable`, with its state rules (hovered, pressed, focused, disabled, selected,
+checked). It reads Compose's own locals, such as `LocalDensity` and `LocalTextStyle`, and nothing
+branded. It applies the interaction state a style supplies; it never chooses a colour.
 
-`ui-designsystem` maps `Primary`, `Ghost`, or a shadcn preset to component `Style` factories.
-Stateful details such as rest, hover, pressed, and disabled live beside that component's design
-system style, not in a Headless visual DTO. `Style` is the only Headless visual contract.
+`:awake:ui:shadcn` maps a variant (`ShadcnButtonVariant.Default`, `Ghost`, a density) to a
+component `Style`. Stateful details such as rest, hover, pressed and disabled live in that
+component's style file (`ShadcnButtonStyle.kt`), not in a parallel visual DTO. `Style` is the
+only neutral visual contract.
 
-Expose branded composition through a lower-case design-system extension such as
-`fun UiScope.shadcnTheme(...)`. It delegates to Core's neutral providers and establishes the
-ambient values that shadcn recipes read. Do not add `ShadcnTheme` or other branded APIs to Core
-or Headless.
-
-Use `shadcnThemeValues(...)` when only immutable theme values are needed; it does not install a
-composition scope. Every `shadcn*` recipe must execute inside `UiScope.shadcnTheme { ... }`.
-There is no Core-theme fallback: a missing scope is an error, so metrics and branded roles can
-never be silently reconstructed from a generic Core theme.
+Install the theme with `provideShadcnTheme(values) { ... }`; recipes read it through
+`shadcnTheme`. Use `shadcnThemeValues(...)` when only immutable theme values are needed; it
+installs nothing. Every shadcn recipe must run inside `provideShadcnTheme`. There is no
+Core-theme fallback: `LocalShadcnTheme` defaults to `null` and `shadcnTheme` throws without a
+provider, so metrics and branded roles are never silently rebuilt from a generic theme. Do not
+add `ShadcnTheme` or other branded APIs to the compose modules.
 
 ## Design System may use Core infrastructure, never Core widget primitives
 
@@ -99,7 +96,7 @@ hit-test, record semantics, or call Core layout/control primitives directly. If 
 that, extend Headless with the missing generic behavior or slot API; duplicated behavior is a
 Headless API gap, not a reason to bypass it.
 
-## Do not add a `UiComponentStyles` registry to `ui-core`
+## Do not add a per-component style registry to `:awake:compose:*`
 
 A per-component size/recipe registry is visual policy and inevitably turns Core into a hidden
 design system. Headless may accept a generic visual-state contract; `ui-designsystem` supplies the

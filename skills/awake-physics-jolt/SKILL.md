@@ -16,13 +16,13 @@ Awake's physics subsystem is partitioned into two clean layers:
 1. `:awake:physics:api` — the pure Kotlin, dependency-free physics contract (rigid bodies, shapes, queries, collision events).
 2. `:awake:backend:jolt` — the high-performance C++ JNI bridge to Jolt Physics.
 
-Read [docs/architecture.md](https://github.com/awakekt/awake/blob/main/docs/architecture.md), [docs/reference/game-structure.md](https://github.com/awakekt/awake/blob/main/docs/reference/game-structure.md), and [skills/awake-ecs-authoring/SKILL.md](https://github.com/awakekt/awake-game-agent-skills/blob/main/skills/awake-ecs-authoring/SKILL.md) first.
+Read [docs/architecture/architecture.md](https://github.com/awakekt/awake/blob/main/docs/architecture/architecture.md), [docs/reference/game-structure.md](https://github.com/awakekt/awake/blob/main/docs/reference/game-structure.md), and [skills/awake-ecs-authoring/SKILL.md](https://github.com/awakekt/awake-game-agent-skills/blob/main/skills/awake-ecs-authoring/SKILL.md) first.
 
 ## 1. Clean Architecture Boundary
 
-- `:awake:physics:api` has **zero native dependencies** and **zero rendering dependencies**. It defines pure value classes and interfaces (`RigidBodyHandle`, `PhysicsShape`, `RayCastHit`, `CollisionEvent`).
+- `:awake:physics:api` has **zero native dependencies** and **zero rendering dependencies**. It defines pure value classes and interfaces (`BodyHandle`, `PhysicsShape`, `RaycastHit`, `ContactEvent`).
 - `:awake:backend:jolt` implements the physics simulation and wraps Jolt's native memory allocations.
-- Never leak raw Jolt pointer addresses (`Long` or `NativePointer`) into gameplay code or scene authoring DSL.
+- Never leak raw Jolt native addresses (the `Long` addresses the backend's contact callbacks receive) into gameplay code or the scene authoring DSL. Gameplay sees only `BodyHandle`, which holds a Jolt body id, never an address.
 
 ## 2. Fixed-Timestep Simulation Loop
 
@@ -37,4 +37,4 @@ Read [docs/architecture.md](https://github.com/awakekt/awake/blob/main/docs/arch
 ## 4. ECS Physics Synchronization
 
 - `PhysicsSystem` reads entity `Transform` components to initialize body positions, steps the physics world, and updates `Transform.position` and `Transform.rotation` from the simulation output.
-- **Rule**: Avoid per-frame allocation when reading body velocities, transforms, or contact points. Reuse scratch `Vector3` and `Quaternion` instances.
+- **Rule**: Avoid per-frame allocation when reading body velocities, transforms, or contact points. Reuse scratch `Vec3f` and `Quat` instances.
