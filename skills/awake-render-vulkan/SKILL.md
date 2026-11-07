@@ -15,7 +15,7 @@ metadata:
 
 Awake's Vulkan backend (`:awake:backend:vulkan`, `:awake:backend:vulkan:bindings`, and `:awake:backend:vulkan:bindings:android-native`) provides direct, high-performance hardware rendering without large engine runtime overhead.
 
-Read [docs/architecture.md](https://github.com/awakekt/awake/blob/main/docs/architecture.md), [docs/mvp-plan.md](https://github.com/awakekt/awake/blob/main/docs/mvp-plan.md), and [skills/awake-render-pipeline/SKILL.md](../awake-render-pipeline/SKILL.md) first.
+Read [docs/architecture/architecture.md](https://github.com/awakekt/awake/blob/main/docs/architecture/architecture.md), [docs/mvp-plan.md](https://github.com/awakekt/awake/blob/main/docs/mvp-plan.md), and [skills/awake-render-pipeline/SKILL.md](../awake-render-pipeline/SKILL.md) first.
 
 ## Hardware only
 
@@ -40,7 +40,7 @@ Every Vulkan creation path must have an explicit, symmetrical destruction path:
 
 ## 3. Swapchain & Surface Resize Behavior
 
-- Window resize triggers `VulkanSwapchain` recreation.
+- Window resize sets `SwapchainManager.surfaceResized`. If the surface really changed, the next frame's acquire recreates the swapchain with `Renderer.recreateSwapChain`. An out-of-date acquire or present recreates it too.
 - Ensure the backing surface is properly queried for `minImageCount`, `currentExtent`, and supported format/color space before recreating the swapchain.
 - Avoid the "backing surface never resized" failure mode by synchronizing surface dimensions with the native window size on each frame boundary.
 - For swapchain fundamentals, consult [vulkan-tutorial.com](https://vulkan-tutorial.com/).
@@ -59,7 +59,7 @@ explicit exception that must be documented at the definition site.
 
 - **Android Vulkan is the primary regression gate**: Android device testing catches alignment, memory qualification, and synchronization bugs that desktop drivers may silently tolerate.
 - **Headless Pixel Baselines**: When touching shader pipelines or draw submissions, run headless pixel-baseline tests (`PixelBaseline.kt`) to verify frame output determinism.
-- **Frame-Timing Harness**: When modifying command buffer recording or state transitions, verify frame timing metrics using `TimingBaseline` in `awake:ui:testing`.
+- **Frame-Timing Harness**: When modifying command buffer recording or state transitions, check frame timing with `RendererHeadlessFrameTimingTest`. It records spans with `FrameSpans` and prints them with `formatTimingBaseline`, both in `awake:engine:render:testing`. It is diagnostic only: it asserts no time limit.
 
 ## 6. Backend boundary guard
 

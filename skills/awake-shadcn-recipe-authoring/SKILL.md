@@ -95,10 +95,17 @@ Every visual style in `awake:ui:shadcn` (colors, borders, paddings, corner radii
    Playwright renders official React `shadcn/ui` components and dumps computed DOM style metrics (`getBoundingClientRect` & `getComputedStyle`) to:
    `docs/reference/shadcn-previews-local/<component>_<theme>.json`
 
-2. **Automated CI Parity Gating (`ShadcnStyleParityTest.kt` & `ShadcnGeometryParityTest.kt`)**:
-   Every component recipe must be registered in the automated Parity Test Suite:
-   - `ShadcnGeometryParityTest`: Verifies width, height, and padding against DOM bounds.
-   - `ShadcnStyleParityTest`: Verifies actual drawn `RoundedQuad` corner radius and fill/border colors against computed CSS metrics.
+2. **Automated gates in `:awake:ui:shadcn`**:
+   - `ShadcnSpecAssertionTest`: asserts every shadcn-derived constant against the Tailwind class it
+     implements. Add a row for each new constant.
+   - `ShadcnVisualBaselineTest`: pins how a component renders, so a fix shows exactly what it
+     changed. `ShadcnBaselineCoverageTest` fails unless every component has a baseline or a line
+     in the debt list, and the debt list may only shrink.
+
+3. **Comparison against the capture (`scripts/awake ui inspect --component <name>`)**:
+   Regenerates the parity evidence for the component against its pinned reference, with each
+   case's geometry status and a review contact sheet. See the `awake-shadcn-parity-workflow` skill
+   for the full run.
 
 ---
 

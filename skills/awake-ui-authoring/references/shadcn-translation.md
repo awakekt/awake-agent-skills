@@ -29,10 +29,10 @@ others is then visible as a *decision* rather than absorbed as the baseline. Rea
 first is how a stale value becomes the thing you match.
 
 **Record the comparison in the file you write**, briefly — what each source said and why you chose
-what you chose. `ShadcnResizableMath` is the model: it states that `shadcn-compose`'s two-panel model
-makes conservation structural and strictly better, then why it does not apply here (N panels, pinned
-by `ResizablePanelDragConservationTest`). Without that note the next person redoes the comparison and
-may reach the other answer.
+what you chose. `ShadcnResizableMath.kt` is the model: it states that `shadcn-compose`'s two-panel
+model makes conservation structural and strictly better, then why it does not apply here (N panels,
+so conservation is arithmetic, pinned by `ShadcnResizableMathTest`). Without that note the next
+person redoes the comparison and may reach the other answer.
 
 A difference you cannot explain is a finding, not noise. All three disagreeing about the same number
 means one of them is a bug — that is how the `kbd` and `toggle` drift surfaced at all.
@@ -94,8 +94,8 @@ contentPadding(Tw.Spacing.s1 + DropdownBorderWidth)   // shadcn `p-1` + border, 
 Real cost of getting this wrong: `shadcnDropdownMenu` rendered its items at x=4 width=152
 inside a 160px surface instead of the reference's x=5 width=150, and the surface measured
 136 tall instead of 138 — exactly 1px per side on both axes, invisible by eye, caught only
-by the parity report. Ten bordered styles share this shape; `ShadcnBorderBoxInsetTest`
-pins the rule for the one with captured reference evidence.
+by the parity report. Ten bordered styles share this shape;
+`ShadcnOverlaysTest.theContentInsetFoldsInTheBorderWidth` pins the rule for the dropdown menu.
 
 ## Ported code takes the canonical name, never the `Ui` alias
 

@@ -35,7 +35,7 @@ file per question, loaded when you need it.
 |---|---|
 | [`references/layer-ownership.md`](references/layer-ownership.md) | Deciding which module something belongs in; ambient fallback vs override; which upstream reference to check a control against |
 | [`references/api-shape.md`](references/api-shape.md) | Adding a public widget function, an overload, or a name; the 4 foundational primitives; return-value vs callback |
-| [`references/compose-parity.md`](references/compose-parity.md) | **Adding anything at all to `:awake:compose:*`**; a `Modifier`/layout function, a `UiLocal`, or a `remember*` hook; escalating a layout-engine defect |
+| [`references/compose-parity.md`](references/compose-parity.md) | **Adding anything at all to `:awake:compose:*`**; a `Modifier`/layout function, a `CompositionLocal`, or a `remember` hook; escalating a layout-engine defect |
 | [`references/shadcn-translation.md`](references/shadcn-translation.md) | Porting a shadcn class string; `Tw.Spacing` naming; CSS `border-box` |
 | [`references/identity-and-catalog.md`](references/identity-and-catalog.md) | Adding a stateful widget, a loop that emits widgets, or a showcase page |
 
@@ -72,17 +72,16 @@ correct under any theme. Copy that shape.
 
 ### Why this matters more than it looks
 
-A Material-flavoured `40.dp` button fallback sat in `ui-headless`. Nothing overrode it, so it
-became the de-facto default -- and then it propagated **upward**: `ShadcnButtonSize.Md` was set
-to `40f` to match, and shadcn's real button is `h-9` = **36px**. The comment in `ShadcnAvatars.kt`
-said the quiet part out loud -- the avatar size was chosen to match "this module's pre-existing
-40dp default", not to match shadcn (`size-8` = 32px).
+A Material-flavoured `40.dp` button fallback once sat in the neutral widget layer. Nothing
+overrode it, so it became the de facto default, and then it spread **upward**:
+`ShadcnButtonSize.Md` was set to `40f` to match, though shadcn's real button is `h-9` = **36px**.
+The avatar recipe's own comment said it matched "this module's pre-existing 40dp default", not
+shadcn's `size-8` = 32px.
 
-**Both are fixed in code: `ShadcnButtonSize.Md` is 36dp and the avatar default is 32dp.** Stated
-because this passage read as a live defect long after it stopped being one, which is its own
-version of the failure it describes -- a claim nothing re-checks. The lesson is what stands.
+**Both are fixed in code: `ShadcnButtonSize.Md` is 36dp and `ShadcnAvatarSizeVariant.Default` is
+32dp.** The lesson stands; the defect does not.
 
-An headless default is not a neutral placeholder. It becomes the spec.
+A neutral default is not a placeholder. It becomes the spec.
 
 Once you are in `ui:shadcn` supplying a real branded value, *where it lives* has its own
 answer — see [`references/shadcn-translation.md`](references/shadcn-translation.md).
@@ -107,19 +106,20 @@ at use. `awake.ui-authored-units-convention` is meant to police this; do not rel
 
 ### The inverse trap: pixels wrapped as Dp (applies to SAMPLES too, not just widgets)
 
-A value computed from a slot (`slot.height - bar.toPx()`) is **pixels**. Wrapping it `.dp`
-re-multiplies by `UiDensity.scale` at resolve time -- 2x on every Retina display, invisible on
-the density-1 machine (and every density-1 test) that wrote it. Studio shipped exactly this:
+A value computed from a measured size (`size.height - bar.toPx()`) is **pixels**. Wrapping it
+`.dp` multiplies it by the density again when it resolves: 2x on every Retina display, invisible
+on the density-1 machine (and every density-1 test) that wrote it. Studio shipped exactly this:
 `Modifier.height(workspaceHeightPx.dp)` doubled the workspace at scale 2 and pushed the dock
 handle and status bar off-frame, which read as "the resizable is broken".
 
-- Slot-derived or otherwise pixel-valued numbers go back into modifiers via `.px`
-  (`Float.px` divides by the scale), never `.dp`.
+- Turn a pixel value back into `Dp` by dividing by `LocalDensity.current`, or with `toDp()`
+  inside a `Density` scope such as a `MeasureScope`. Never with `.dp`.
 - This rule is layer-independent: sample shells violate it as easily as widgets.
 - A pre-commit grep for `[a-zA-Z]Px\.dp\b` catches the naming-convention cases mechanically.
-- Any layout suite guarding a live shell needs at least one case at `UiDensity.scale = 2` --
-  at scale 1 the whole bug class is definitionally invisible
-  (`StudioShellLayoutTest.workspaceStaysInsideTheShellAtRetinaDensity` is the model).
+- Any layout suite guarding a live shell needs at least one case at density 2
+  (`ComposeHost(density = 2f)`, or `composeTestSession(..., density = 2f)`). At density 1 the
+  whole bug class is invisible. `ShadcnDragTest.draggingTheSliderChangesItsValueAtTwoTimesDensity`
+  is the model.
 
 ## Modifier order defines the hit target
 
@@ -140,8 +140,8 @@ Test a real click in blank field padding, not only its semantics or screenshot.
       or provided through a generic Headless visual/layout contract -- never Core's component
       style registry.
 - [ ] No raw-pixel `Float` constants; authored values are `Dp`, converted at use.
-- [ ] No decoration choice (border width, chosen semantic colour), named variant, or direct
-      `UiContext`/`Local*` stack read in `ui-headless`.
+- [ ] No decoration choice (border width, chosen semantic colour), named variant, or branded
+      local such as `LocalShadcnTheme` read in `:awake:compose:foundation`.
 - [ ] New visual state is represented by generic `Style` and implemented in that component's
       design-system style file, never by a parallel visual DTO.
 - [ ] Name matches the Radix concept; file name matches what the file exports.
@@ -151,24 +151,24 @@ Test a real click in blank field padding, not only its semantics or screenshot.
 - [ ] New behaviour landed in `ui-headless`, not in the `shadcn*` wrapper.
 - [ ] Interactive controls own `clickable` before their internal visual content padding; ordinary
       caller-authored modifier order remains untouched and Compose-faithful.
-- [ ] One public function on `UiScope` -- no per-scope overload that only changes a default.
+- [ ] One public `context(Composer)` function per widget -- no `RowScope`/`ColumnScope`/`BoxScope`
+      overload that only changes a default.
 - [ ] No new `ui-headless` `label:`/content-shape overload -- a text label is
       `widget(id) { text("...") }` through the existing slot, not a second resolution path.
       `shadcn*` may still expose `label:` as sugar, but its body must call that same slot.
 - [ ] Built exclusively from the 4 Foundational Primitives (`surface`, `row`/`column`/`box`/`spacer`, `text`/`icon`, `Modifier.*`) -- no raw canvas emitters or `interactiveSurface`.
-- [ ] Every `id` param is required, not defaulted/nullable, unless the widget genuinely
-      never constructs a child widget's id from it. Any loop or repeated call site derives
-      a unique id per iteration (`"$id.sep.$index"`), never relies on a shared default.
+- [ ] Every loop that emits widgets wraps each item in `key(stableId) { }`, and a component that
+      remembers wraps its body in `rememberGroup`. State is positional; see
+      `references/identity-and-catalog.md`.
 - [ ] Nothing was added to `:awake:compose:runtime`/`ui`/`foundation` that `androidx.compose.*`
       does not ship. The test is upstream's package, not where it feels like it fits -- `Slider` is
       behaviour and Compose still puts it in Material. Anything carrying or parameterised by a
       design-system number is design-system code however behavioural it looks.
-- [ ] New `Modifier`/layout DSL function checked against `mirror-map.md` +
-      `compose-modifier-layout-guidance.md` first -- matches Compose's real API if Compose
-      has one, or is clearly named/documented as engine-specific if it doesn't. Not added
-      just because it "feels like it should exist." New animation or `remember*` state-hook
-      surface gets the same check against `mirror-map.md` + `compose-animation-guidance.md`
-      (animation) or `references/compose-parity.md` (state hooks).
+- [ ] New `Modifier`/layout DSL function checked against Core's `17-modifier-parity.md` and
+      `15-compose-parity.md` first -- matches Compose's real API if Compose has one, or is
+      clearly named/documented as engine-specific if it doesn't. Not added just because it
+      "feels like it should exist." New animation or `remember` surface gets the same check
+      against `05-animation.md` (animation) or `references/compose-parity.md` (state hooks).
 - [ ] All three sources read before writing a shadcn component, in order: upstream `.tsx` for the
       values, `shadcn-compose` for a solved Kotlin translation, Awake's existing code for the bugs
       it already fixed. The comparison is noted in the file. A difference none of them explains is

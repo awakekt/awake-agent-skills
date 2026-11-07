@@ -12,138 +12,125 @@ metadata:
 ## Why this exists
 
 `awake-core-math` Rule 2 bans allocation inside `System.update`. UI needs the same rule and did
-not have it. Measured 2026-08-21 before any of the fixes below:
+not have it. Measured 2026-08-21 on the old `ui-core` engine, before any of the fixes below:
 
 - **1,151,016 bytes allocated per frame** for 60 plain surfaces (~68 MB/s at 60fps)
 - **15.09 ms/frame** for `samples:ui-showcase`'s shell — the whole 16.67 ms budget, UI alone,
   before a single 3D frame
 
-Both have one cause. The engine rebuilds every frame from scratch (`UiLocal.kt`: no composition,
-nothing to invalidate), and measurement re-executes content rather than querying nodes.
+Most of that came from `ui-core` measuring a container by re-running its content. Core now runs
+the retained `:awake:compose` engine: layout is single-pass, `Constraints` in and a measured node
+out. Two things did not change, and they are why the rules below still apply. The whole tree
+composes every frame (`ComposeHost.frame`): nothing skips and nothing is observed. And every node
+is measured, placed and drawn every frame: nothing is skipped because it did not change.
 
-## Rule 1 - a UI function is per-frame code
+## Rule 1 - a composable is per-frame code
 
-Anything reachable from a `row`/`column`/`surface` content lambda runs at least once per frame,
-forever. Apply the same discipline `System.update` gets.
+Anything reachable from a composable body, a `MeasurePolicy` or a draw block runs at least once
+per frame, forever. Apply the same discipline `System.update` gets.
 
 Non-obvious allocators found in this codebase, all of them in hot paths:
 
 | Trap | Cost | Fix |
 |---|---|---|
-| `val Modifier get() = UiModifier()` | one object per *read* | share one immutable instance |
+| `val x get() = Thing()` on a value read every frame | one object per *read* | share one immutable instance |
 | `copy(x = value)` when `value` is already `x` | full data-class copy | identity guard, return `this` |
 | `list.filter { }.forEach { }` | list + iterator per call | indexed `for (i in list.indices)` |
 | `listA + listB` | new backing array | append into one reused list |
 | `addAll(collection)` | copies through `toArray()` | indexed add loop |
 | `for (x in list)` on a `List` | `Iterator` object | indexed loop |
-| `Style { … } then caller` | builder + rules list per call | hoist the constant half to a `val` |
+| `Style { … }` built in a composable body | a style object per call | hoist a constant style to a `val`; key a derived one with `remember` |
 
 None of these read as expensive. Every one was a measurable share of the frame.
 
-## Rule 2 - trial passes multiply everything
+## Rule 2 - intrinsics are the extra walk, and they are silent
 
-A `row`/`column`/`surface` measures by *re-running its own content*. So a cost inside a content
-lambda is paid once per trial pass, not once per frame.
+A node is measured once per frame. An intrinsic query, such as `Modifier.width(IntrinsicSize.Min)`
+or a policy asking its children how wide they would like to be, walks the subtree again first.
+Compose never tells you when you paid for one.
 
-Real counts: 115 passes for a 60-surface fixed-size scene, 418 for the same scene with weighted
-children, **7,384 for ui-showcase's shell**. A trial pass carries ~1,360 bytes of fixed overhead
-on top of whatever the content itself does.
+Count them: set `LayoutStats.enabled = true`, run some frames, and read
+`LayoutStats.intrinsicQueries`. It costs nothing while off. Put an intrinsic size as close to the
+leaves as you can: one near the root walks everything beneath it again.
 
-Consequence when reading a profile: a per-node saving of a few hundred bytes is not small, and a
-"cheap" call inside a content lambda is not cheap.
+## Rule 3 - build what draws once, not every frame
 
-## Rule 3 - do not build what a trial discards
+The tree composes every frame, so an object built in a composable body is built every frame. Hold
+on to what does not change:
 
-`UiContext.emit` is gated on `!measuring`, so every primitive a trial emits is dropped. Building
-it was waste. Guard the *construction*, not just the emission:
+- A value derived from inputs: `remember(key) { }`, or `remember(key1, key2) { }`.
+- A path, gradient or matrix used to draw: `Modifier.drawWithCache { }`. It rebuilds when the
+  node's size, density or layout direction changes, and replays the recorded drawing in between.
 
-```kotlin
-if (context.isMeasuringInternal()) {
-    clip(rect, content)   // rounded rect's path bounds are the rect
-    return
-}
-val path = shape.toPath(rect)   // only the real pass needs this
-```
+Text already does this: each text node keeps its last measurement and glyph run in a
+`TextLayoutCache` and reuses them while nothing that shapes the text has changed. Do not shape or
+measure text yourself in a composable body.
 
-Applies to path tessellation, gradient construction, text shaping — anything whose only consumer
-is a discarded draw primitive. It does **not** apply to anything measurement reads: sizes,
-padding, and weights must be identical in a trial or layout diverges from what gets drawn.
+## Rule 4 - a `remember` key is a cache key, and silent when wrong
 
-## Rule 4 - `cacheKey` is opt-in, and silent when unarmed
+`remember` returns the old value until a key changes, by `==`. A key that leaves out an input
+ships **silently stale** output. A shadcn style reads the theme *and* switches on a variant, so it
+keys on both: `remember(theme, variant) { }`. Keyed on the theme alone, a variant change returns
+the last variant's style. Widget-local state is an input too.
 
-`row`/`column`/`surface` take `id` and `cacheKey`. They skip the `hasWeightedChild` detection
-trial (`resolveHasWeightedChild`) and the WrapContent sizing trial
-(`resolveMeasuredContentCached`) across frames.
+The opposite mistake costs time instead: a key that changes every frame, such as a fresh object or
+an animating float, rebuilds every frame and the `remember` buys nothing.
 
-- **Both are required.** `id` alone arms nothing — either being null is a plain passthrough.
-- **Only `surfaceCore` propagates.** It pushes `LocalCacheKey` around its content, so a subtree
-  under a keyed `surface()` inherits it. A keyed `row`/`column` keys itself only.
-- **Placement beats coverage.** A trial re-executes the whole subtree beneath it, so a key on a
-  root container is worth far more than keys on leaves. Caching one ui-showcase shell row cut
-  15,381 passes to 7,690.
-- **Sizes are never cached.** The plannedSlots distribution trial always re-measures at the
-  frame's real resolved slot. `cacheKey` cannot skip it.
-
-A key that does not change when the content's `weight()` structure changes ships **silently
-stale layout**. Widget-local state counts: a collapsible's `expanded` changes structure without
-changing any app-level state object. When migrating a screen, set
-`UiWeightCacheConsistencyCheck.enabled = true` in a test that exercises navigation and toggling —
-every cache hit then re-runs the real trial and throws on disagreement.
+There is no vararg `remember`, on purpose: an array per call per frame is the cost it exists to
+avoid. Test a cached value by changing each input between two frames and asserting the output
+moved.
 
 ## Rule 5 - measure, and distrust the measurement's shape
 
 Pick the probe by the question. None of them answers another one's question.
 
-**Bytes per frame — desktop only.** `UiFrameAllocationProbe` holds a ceiling that ratchets down
-as fixes land, plus a fixed-vs-weighted decomposition and a trial count.
+**Bytes and ms per frame, desktop only.** `ComposeFrameProbe` holds a byte ceiling that ratchets
+down as fixes land, prints ms/frame beside the total, and splits the bytes by phase.
+`TextFrameProbe` does the same for text that does not change. `ConstraintsAllocationProbe` and
+`InputAdapterAllocationProbe` in `:awake:compose:ui` cover one subsystem each.
 
 ```bash
-./gradlew :awake:compose:foundation:desktopTest --tests "*UiFrameAllocationProbe*" --rerun-tasks -i
+./gradlew :awake:compose:foundation:desktopTest --tests "*ComposeFrameProbe*" --rerun-tasks -i
 ```
 
-Desktop-only on purpose: it counts with `ThreadMXBean.currentThreadAllocatedBytes`, a JVM API
-with no wasm or Native equivalent. There is currently **no allocation measurement off the JVM** —
-that gap is real and unfilled.
+Desktop-only on purpose: they count with `ThreadMXBean.currentThreadAllocatedBytes`, a JVM API
+with no wasm or Native equivalent. There is currently **no allocation or layout-time measurement
+off the JVM** in the suite. That gap is real and unfilled.
 
-**Layout time per frame — desktop and real browser.** `UiFrameTimeProbeTest` lives in
-`commonTest`, so the same scene runs on both. Run both and compare; the ratio is the point.
+**Geometry per frame.** `UiFrameCostRatchetTest` (`:awake:ui:shadcn`, `commonTest`) counts mesh
+vertices and draw runs for one fixed frame of real shadcn widgets. Counts, not milliseconds: they
+are exact, and the backend's upload work is proportional to them. `UiUploadCostBenchmark`
+(`:awake:backend:vulkan`) carries the one loose time bound.
 
-```bash
-./gradlew :awake:compose:foundation:desktopTest --tests "*UiFrameTimeProbeTest*" --rerun-tasks -i
-```
-```bash
-./gradlew :awake:compose:foundation:wasmJsBrowserTest --tests "*UiFrameTimeProbeTest*" --rerun-tasks
-```
-
-The wasm run is real headless Chrome under karma. It works because it drives
-`beginFrame`/`finishFrame` directly and never touches `requestAnimationFrame` — that is the
-render loop, not the layout code. Same reason it cannot measure GPU submission or end-to-end
-fps: those need a real presenting window. Read wasm results from
-`build/test-results/wasmJsBrowserTest/*.xml`, not stdout.
+**Layout throughput.** `:awake:ui:benchmark` holds kotlinx-benchmark suites
+(`FlexLayoutBenchmark`, `LayoutNestingBenchmark`) for the JVM.
 
 **Where a real frame's milliseconds went — running app.** `SceneAppLifecycleRuntime.perfStatsEnabled`
 (**F2**, `fn+F2` on a Mac keyboard; not F3/F5, which are browser Find and reload) splits the frame
-into UI build, UI staging, and sim+render, with trial time as a share of UI build. Studio prints it
-in its status bar. This is the only tool that can tell a layout problem from a GPU one.
+into UI build, UI wait, UI staging, and sim+render, and turns on the renderer's draw stats.
+`ComposeFrameStats` times one host's composition passes on their own. Studio prints the split in
+its status bar. This is the only tool that can tell a layout problem from a GPU one.
 
-**Whole-page ms and trials — headless.** `ShowcaseFramePerfProbeTest` / `StudioFramePerfProbeTest`.
+**Whole-page ms — headless.** Studio's `StudioFramePerfProbeTest` measures its shell.
+`FrameSpans` (`:awake:engine:render:testing`) records named spans for a probe like it, so CPU and
+GPU timings come out as comparable label-to-ms maps.
 
 Three ways this went wrong in practice:
 
-1. **The scene shape decides what you can see.** A fixed-size probe scene runs ~2 trials per
-   surface; a weighted one runs ~7. Measured on the wrong shape, trial-count work looks worthless.
-   Run both.
+1. **The scene shape decides what you can see.** `ComposeFrameProbe` has no text in it, so text
+   cost went unmeasured until a node-graph canvas at rest turned out to spend most of its frame
+   there. Run more than one shape.
 2. **The ranking reorders after every fix.** Re-profile between changes. The site predicted to
    dominate (draw primitives) never appeared in the profile at all; the real top site was a map
    copy nobody suspected.
 3. **Desktop JVM is the forgiving platform — for allocation.** Its young generation is hundreds
    of MB; ART and Kotlin/Native are where allocation rate actually costs pauses. But do not
-   extend that intuition to CPU time without measuring it. `UiFrameTimeProbeTest` runs the same
-   scene on desktop JVM and on real headless Chrome, and layout time differs by only **1.23×**
-   (0.66 vs 0.82 ms/frame). A whole-frame regression bigger than that is not coming from layout,
-   whatever the platform folklore says.
+   extend that intuition to CPU time without measuring it. On the old engine the same layout
+   scene ran on desktop JVM and in real headless Chrome only **1.23×** apart (0.66 vs 0.82
+   ms/frame). A whole-frame regression bigger than that was not coming from layout, whatever the
+   platform folklore said.
 
-**Always print a total alongside a per-frame average.** The first desktop run of that probe
+**Always print a total alongside a per-frame average.** The first desktop run of a frame probe
 reported 0.26 ms/frame; the total elapsed contradicted it, and it was a warm-up artifact. Without
 the second number a 3× claim would have shipped and sent the next person at the wrong subsystem.
 
@@ -152,14 +139,13 @@ Dear ImGui and Nuklear run effectively zero steady-state allocation, so this is 
 
 ## What this does not fix
 
-Every rule above is a constant-factor win inside a model that measures by re-execution. Compose
-and Flutter build a node tree once and measure nodes, so measuring twice costs arithmetic and
-`cacheKey` has no reason to exist. That is the real answer, and it is a rewrite of the frame loop
-— see `docs/reference/mirror-map.md`'s trial-measure row. Do not present `cacheKey` migration as
-having solved frame time; it moves a large constant.
+The retained engine was the rewrite the old rules pointed at: single-pass measurement removed
+trial passes, and the opt-in layout cache went with them. It does not skip. Every composable runs
+and every node is measured each frame, so a screen that is slow because it is big stays slow, and
+there is no invalidation to lean on. Skipping was tried and removed; the runtime section of Core's
+`docs/reference/compose-engine/15-compose-parity.md` says what it cost.
 
-And do not reach for that rewrite to fix a *platform* gap. Web frame time measured ~2.5× desktop
-while UI layout measured only 1.23× — so on that evidence the extra milliseconds are downstream
-of layout (GPU submission, buffer uploads, present), and a retained node tree would not have
-recovered them. Attribute the frame with F2 before choosing a subsystem. The most expensive
-mistake available here is a correct fix applied to the wrong layer.
+And do not reach for an engine change to fix a *platform* gap. Web frame time measured ~2.5×
+desktop while UI layout measured only 1.23× — so the extra milliseconds were downstream of layout
+(GPU submission, buffer uploads, present). Attribute the frame with F2 before choosing a
+subsystem. The most expensive mistake available here is a correct fix applied to the wrong layer.
