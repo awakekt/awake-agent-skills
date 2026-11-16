@@ -4,7 +4,7 @@ description: What makes an Awake UI frame expensive, and the traps that make a c
 license: Apache-2.0
 metadata:
   author: awake
-  last-updated: '2026-08-30'
+  last-updated: '2026-11-16'
 ---
 
 # Awake UI performance
@@ -94,8 +94,15 @@ down as fixes land, prints ms/frame beside the total, and splits the bytes by ph
 ```
 
 Desktop-only on purpose: they count with `ThreadMXBean.currentThreadAllocatedBytes`, a JVM API
-with no wasm or Native equivalent. There is currently **no allocation or layout-time measurement
-off the JVM** in the suite. That gap is real and unfilled.
+with no wasm or Native equivalent.
+
+**Bytes per frame in a browser.** The JVM figure does not transfer: Kotlin/Wasm allocates for
+calls the JVM runs free (about 28 B for a call that leaves a default to a function of four or more
+parameters, the same for a lambda converted to a `fun interface` or a `Comparator`). The WebGPU
+backend's stage heap tests (`MovingCameraStageHeapBrowserTest`, `PrepareHeapBreakdownBrowserTest`)
+and scene3d's `PlanningHeapBreakdownBrowserTest` measure JS heap growth per stage in Chromium; a
+per-item path is cleared there, not by a JVM probe. `ComposeHost.frameCounts` reports what a frame
+composed, measured and drew, and `ComposeHost.explainMeasure` names what invalidated a measure.
 
 **Geometry per frame.** `UiFrameCostRatchetTest` (`:awake:ui:shadcn`, `commonTest`) counts mesh
 vertices and draw runs for one fixed frame of real shadcn widgets. Counts, not milliseconds: they
@@ -140,10 +147,23 @@ Dear ImGui and Nuklear run effectively zero steady-state allocation, so this is 
 ## What this does not fix
 
 The retained engine was the rewrite the old rules pointed at: single-pass measurement removed
-trial passes, and the opt-in layout cache went with them. It does not skip. Every composable runs
-and every node is measured each frame, so a screen that is slow because it is big stays slow, and
-there is no invalidation to lean on. Skipping was tried and removed; the runtime section of Core's
-`docs/reference/compose-engine/15-compose-parity.md` says what it cost.
+trial passes, and the opt-in layout cache went with them. By default it does not skip: every
+composable runs and every node is measured each frame, so a screen that is slow because it is big
+stays slow. The runtime section of Core's `docs/reference/compose-engine/15-compose-parity.md`
+says what skipping cost when it was first tried.
+
+Skipping is opt-in and whole-frame. `ComposeHost.skipUnchangedComposition` skips a frame's
+composition when no snapshot state it read has changed, and `skipUnchangedMeasure` skips the
+measure pass too, but only with composition skipping on and only while nothing read during the
+last measure changed. One changed read recomposes or re-measures the whole tree. Two things defeat
+it silently:
+
+- **State the snapshot system cannot see.** A composable that reads a plain field or a polled
+  getter looks unchanged, and the frame is skipped with stale content. Do not turn the switches on
+  for an app until `verifySkippedCompositions` is clean on it.
+- **Composing inside measure, and reading the frame clock.** A subcomposition that runs during
+  measure (`BoxWithConstraints`) and reads `LocalFrameClock` invalidates measure every frame. Size
+  from placement instead, and read the clock in draw, only while something moves.
 
 And do not reach for an engine change to fix a *platform* gap. Web frame time measured ~2.5×
 desktop while UI layout measured only 1.23× — so the extra milliseconds were downstream of layout

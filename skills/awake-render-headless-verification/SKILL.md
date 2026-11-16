@@ -4,7 +4,7 @@ description: Verify what the engine actually renders, without a window. Read bef
 license: Apache-2.0
 metadata:
   author: awake
-  last-updated: '2026-10-03'
+  last-updated: '2026-11-16'
 ---
 
 # Awake Render: Headless Verification
@@ -66,6 +66,20 @@ More wrong conclusions in this repo have come from stale runs than from stale co
   place (the Edit tool, or a Python truncate-write).
 - When a control run must execute, pass `--rerun`.
 - A control that "passes" is suspicious. Check the task list for `compileKotlinDesktop`.
+- A green step is not a run. Read the log for the test's name and its printed figure. A browser
+  test task that names no test, a test recorded as skipped after its worker died, and a
+  verification task that hangs off `check` while CI runs `awakeVerify` have each passed here
+  without executing.
+- A WebGPU test fails on a validation error only through the headless helpers
+  (`webGpuHeadlessScene`, `webGpuHeadlessUi`, `webGpuHeadlessPlan`): a device a test builds for
+  itself reports errors on a callback thread and still records a pass.
+- Headless frames never overlap. A bug that needs two frames in flight (a resource freed or
+  overwritten while the GPU still reads it) passes every headless run, validation layer included.
+  Prove it on a real surface with `:awake:backend:vulkan:desktopWindowedTest` under xvfb, and
+  remove the fix once to see the test fail.
+- lavapipe filters anisotropically only for implicit derivatives. A shader that samples with
+  explicit gradients shows no pixel change between 1 and 16 samples there, so prove a sampler
+  setting through an implicit-sampling probe and leave the scene path to a real GPU.
 
 ## Rule 6: read the code before sweeping a constant
 

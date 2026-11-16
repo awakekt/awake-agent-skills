@@ -8,7 +8,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: awake
-  last-updated: '2026-10-09'
+  last-updated: '2026-11-16'
 ---
 
 # Vulkan Backend Engineering in Awake
@@ -31,6 +31,13 @@ Every Vulkan creation path must have an explicit, symmetrical destruction path:
 - `VkDevice` / `VkInstance` / `VkSwapchainKHR` destruction ordering must match standard Vulkan spec rules.
 - Texture and buffer objects must track their memory allocations (`VkDeviceMemory` / VMA allocator) and destroy them symmetrically when unbind/dispose occurs.
 - Never rely on JVM finalizers or GC to release GPU handles.
+- **Frames in flight own what they read.** Before freeing, reallocating or overwriting anything a
+  submitted command buffer reads (a depth target, a sampler, a per-frame uniform block), wait for
+  the frames in flight and for submitted offscreen work. An offscreen view submits against the
+  current frame slot, so a frame that draws nothing must still await it before writing that slot.
+- **The backend releases apart from Core.** A fix in `awake:backend:vulkan` reaches a consumer with
+  the next `vulkan-v*` tag, not with the Core version that contains its source. A consumer drops a
+  workaround only on that backend version, and a headless test on both versions is the proof.
 
 ## 2. JNI Bindings & Generated Code Contract
 
@@ -57,6 +64,9 @@ explicit exception that must be documented at the definition site.
 
 ## 5. Verification & Regression Gate
 
+- **Synchronization validation and a real surface**: `desktopSyncValidationTest` runs the layer's
+  synchronization checks headlessly, and `desktopWindowedTest` presents through a window with frames
+  in flight. A change to present, to a render pass dependency or to a resource's lifetime runs both.
 - **Android Vulkan is the primary regression gate**: Android device testing catches alignment, memory qualification, and synchronization bugs that desktop drivers may silently tolerate.
 - **Headless Pixel Baselines**: When touching shader pipelines or draw submissions, run headless pixel-baseline tests (`PixelBaseline.kt`) to verify frame output determinism.
 - **Frame-Timing Harness**: When modifying command buffer recording or state transitions, check frame timing with `RendererHeadlessFrameTimingTest`. It records spans with `FrameSpans` and prints them with `formatTimingBaseline`, both in `awake:engine:render:testing`. It is diagnostic only: it asserts no time limit.
