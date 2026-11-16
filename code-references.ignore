@@ -29,3 +29,5 @@ EditorDock
 EntityPreset
 # Build output, never in the tree
 awake/ui/shadcn/build/reports/compose-preview/
+# Kotlin standard library, named by the Kotlin/Wasm allocation notes
+Comparator

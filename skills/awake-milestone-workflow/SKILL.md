@@ -7,7 +7,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: awake
-  last-updated: '2026-10-03'
+  last-updated: '2026-11-16'
   keywords: Awake, release, milestones, GitHub, issues, git hygiene, squashing, ADR
 ---
 
@@ -76,6 +76,20 @@ This skill defines the operational boundary between **GitHub Milestones & Issues
      ```bash
      gh issue close <issue-number>
      ```
+
+5. **A release cut freezes `main`**:
+   - From the release-cut PR to its tag, merge nothing else into `main`. A merge makes the cut stale,
+     and bringing it up to date restarts its whole rehearsal.
+   - A second cut cannot start while a `release-cut/*` branch or an open `chore(release)` PR exists.
+   - A publish that reached an upload step is never re-run.
+
+6. **Run what CI runs before every push**:
+   - `spotlessCheck` and `detekt` for each module touched.
+   - `scripts/api-binary-compat.sh` against the last release whenever a public type changes. A
+     released constructor, a function-typed parameter or a default-argument bridge that disappears
+     fails the guard; keep the released signature as a deprecated overload that delegates.
+   - A verification task belongs in root `awakeVerify`. One that only hangs off `check` is never
+     run by CI.
 
 ---
 

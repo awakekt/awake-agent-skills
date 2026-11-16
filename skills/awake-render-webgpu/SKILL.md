@@ -7,7 +7,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: awake
-  last-updated: '2026-10-09'
+  last-updated: '2026-11-16'
 ---
 
 # WebGPU Backend Engineering in Awake
@@ -53,6 +53,24 @@ ledger is empty. Before adding a content-shaped class here, read
 
 - Use staging buffers or `queue.writeBuffer` with explicit byte offsets and sizes.
 - Ensure all created `GPUTexture` and `GPUBuffer` objects have matching `.destroy()` calls when their owning scene or material is disposed.
+
+## 4.5 What allocates on Kotlin/Wasm and not on the JVM
+
+The browser pays for calls the JVM runs for free, so a JVM allocation probe cannot clear a
+per-draw or per-renderer path. Measure in Chromium with the stage heap tests
+(`MovingCameraStageHeapBrowserTest`, `PrepareHeapBreakdownBrowserTest`,
+`PlanningHeapBreakdownBrowserTest`) and keep these out of per-frame, per-item loops:
+
+| Shape | Cost a call |
+|---|---|
+| A call with four or more parameters that leaves any argument to its default | about 28 B |
+| A lambda converted to a `fun interface`, a `Comparator` included | about 28 B |
+| A function-typed parameter that takes or returns a primitive | boxes each value |
+| Copying a float array with the standard library's ranged copy | about 84 B |
+
+Pass every argument on a hot path, sort with an inline comparison, declare a primitive `fun
+interface` for a writer, and copy with a plain loop. Core's `docs/reference/kotlin-wasm-allocation.md`
+holds the measurements.
 
 ## 5. Backend boundary guard
 

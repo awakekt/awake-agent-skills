@@ -4,7 +4,7 @@ description: Structure Awake render features, pipelines, materials, and cross-ba
 license: Apache-2.0
 metadata:
   author: awake
-  last-updated: '2026-10-09'
+  last-updated: '2026-11-16'
 ---
 
 # Awake render pipeline guidance
@@ -35,3 +35,9 @@ shared render graph or an optional authored feature.
   to order-sensitive UI draws.
 - Derive GPU layout and uniform data from the shared typed schemas and writers; do not hand-code
   sizes, offsets, field indices, or packed arrays.
+- `RenderSystem3D` replans every frame unless its host says the scene is not realtime, and no
+  shipped host does. Treat collect and compile as per-frame, per-renderer code: reusing the last
+  plan is an opt-in, not the default a consumer runs.
+- A device setting that changes a GPU resource (sampler anisotropy, shadow map size) takes effect by
+  replacing the resource and letting each cached bind group or descriptor set notice. Setting the
+  same value again must do nothing, and the old resource is freed only after frames in flight drain.
