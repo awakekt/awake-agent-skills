@@ -131,7 +131,10 @@ Three ways this went wrong in practice:
    dominate (draw primitives) never appeared in the profile at all; the real top site was a map
    copy nobody suspected.
 3. **Desktop JVM is the forgiving platform — for allocation.** Its young generation is hundreds
-   of MB; ART and Kotlin/Native are where allocation rate actually costs pauses. But do not
+   of MB; ART and Kotlin/Native are where allocation rate actually costs pauses. It also hides
+   allocation that exists only on Kotlin/Wasm (see "Bytes per frame in a browser" below): a JVM
+   probe that reads zero clears nothing for the browser, so go to the browser heap test first for
+   a web complaint. But do not
    extend that intuition to CPU time without measuring it. On the old engine the same layout
    scene ran on desktop JVM and in real headless Chrome only **1.23×** apart (0.66 vs 0.82
    ms/frame). A whole-frame regression bigger than that was not coming from layout, whatever the
@@ -159,8 +162,9 @@ last measure changed. One changed read recomposes or re-measures the whole tree.
 it silently:
 
 - **State the snapshot system cannot see.** A composable that reads a plain field or a polled
-  getter looks unchanged, and the frame is skipped with stale content. Do not turn the switches on
-  for an app until `verifySkippedCompositions` is clean on it.
+  getter looks unchanged, and the frame is skipped with stale content. Hold it in `mutableStateOf`,
+  or wrap a value owned elsewhere in a `PolledState`. Do not turn the switches on for an app until
+  `verifySkippedCompositions` is clean on it.
 - **Composing inside measure, and reading the frame clock.** A subcomposition that runs during
   measure (`BoxWithConstraints`) and reads `LocalFrameClock` invalidates measure every frame. Size
   from placement instead, and read the clock in draw, only while something moves.
