@@ -37,7 +37,9 @@ that wants the game skills pins awake-game-agent-skills itself.
 | `awake-copyright-provenance` | Record and verify lawful provenance before adapting or copying source into Awake |
 | `awake-core-editor` | Maintain the vendor-neutral editor plugin contract in Awake Core (:awake:editor:contract): its layer boundary, canonical names and verification |
 | `awake-framework-boundary` | Decide whether a proposed capability belongs in the Awake framework or in a consuming game repository |
+| `awake-memory-lifecycle` | Retained heap lifecycle, cache eviction, mutable map-key bans, and CPU-to-GPU release rules for Awake Core resolvers, systems, and backends |
 | `awake-milestone-workflow` | Repository hygiene, GitHub milestone tracking, and commit squashing workflow for Awake Engine |
+| `awake-mobile-gpu-performance` | Mobile tile-based GPU (Adreno/Mali) fragment, texture bandwidth, auxiliary render-target, and render-pass rules for Awake Core shaders and passes |
 | `awake-physics-jolt` | Rules and invariants for Awake's physics system (`awake:physics:api` and `awake:backend:jolt` C++ bridge) |
 | `awake-platform-capability-design` | Design, extract and test a portable Awake Core capability (storage, paths, handles, codecs, asset sources, browser persistence), weakest platform first |
 | `awake-render-headless-verification` | Verify what the engine actually renders, without a window |
