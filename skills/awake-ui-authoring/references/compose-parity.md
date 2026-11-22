@@ -10,7 +10,7 @@ Extends `SKILL.md`. Read before adding to the `:awake:compose:*` surface, before
 > A public declaration in `:awake:compose:runtime`, `:awake:compose:ui` or
 > `:awake:compose:foundation` must correspond to something `androidx.compose.runtime`,
 > `androidx.compose.ui` or `androidx.compose.foundation` actually ships. If it does not, it belongs
-> in `ui-designsystem` — or in the consuming module — not here.
+> in `:awake:ui:shadcn` or `:awake:ui:material3` — or in the consuming module — not here.
 
 These modules exist to *be* Compose's surface on a different runtime. That claim is the entire
 reason a Compose-literate reader can predict what they do, and it is what `mirror-map.md` audits.
@@ -28,7 +28,7 @@ Worked example, from a real attempt during Stage 3:
 | Proposed | `sliderTrack()`, `sliderValueAt()`, `nearerThumb()` in `:compose:foundation:gestures` |
 | Argument for | Pointer-to-value mapping is behaviour; the recipe should not re-derive it |
 | Why it was wrong | Compose Foundation has no slider anything. `Slider` is Material. Foundation ships `draggable`, and Material builds on it |
-| Where it went | `ui-designsystem`, as `shadcnSliderTrack`/`shadcnSliderValueAt` — which is also the layer that owns the thumb size those functions take |
+| Where it went | `:awake:ui:shadcn`, as `shadcnSliderTrack`/`shadcnSliderValueAt` — which is also the layer that owns the thumb size those functions take |
 
 A second reason the boundary held here: the old `ui-headless` slider baked in `6.dp` and `16.dp`
 with a comment naming their source as shadcn v4. Anything that carries a design-system number, or
@@ -123,20 +123,19 @@ cannot express the source result, record it in
 [`docs/reference/ui-parity-core-issues.md`](https://github.com/awakekt/awake/blob/main/docs/reference/ui-parity-core-issues.md)
 with the evidence its admission rule asks for.
 
-## Bound-derived interiors must not report intrinsic size
+## Bound-derived interiors must not report intrinsic size from fraction-sized children
 
-A widget whose interior layout is `fraction x its own resolved bound` (a resizable panel
-group, a scroll viewport's content) has **no intrinsic size** -- yet inside a WrapContent
-parent's measure trial its children's claims land at trial-inflated positions and register as
-phantom content extent. The showcase's preview card grew by the drag delta every frame this
-way: the group's handle claim at `fraction x trial-bound` out-measured the card's real text
-content, and the re-measured card re-based the panel budget mid-gesture.
+A widget whose interior layout is `fraction × its own resolved bound` (a resizable panel group, a
+scroll viewport's content) has **no intrinsic size derived from child placement** — if its
+`MeasurePolicy` reports intrinsic dimensions by asking fraction-placed children for their bounds
+during a wrap-content pass, child placements at trial-inflated widths feed back into the parent
+card and make dragging/interacting inside a card resize the card itself.
 
-Wrap the real content dispatch of such widgets in `boundDerivedContent { ... }`
-(`ui-core/scope/UiScopeNesting.kt` -- the stronger sibling of `compositeContent`, isolating
-wrap-extent trackers, not just the child list). Scroll viewports already do the equivalent via
-`withMeasuredSubtreeIsolated`. Symptom to recognize: "dragging/interacting inside a card
-re-sizes the card itself".
+In `:awake:compose:*`, a bound-derived container resolves its own size from incoming `Constraints`
+(or an explicit `Modifier.size` / `fillMax*`) and reports `0` (or its own fixed minimum) from its
+intrinsic measurement hooks (`minIntrinsicWidth`, `maxIntrinsicWidth`, `minIntrinsicHeight`,
+`maxIntrinsicHeight`), measuring its children only with the container's resolved bounds. Symptom to
+recognize: "dragging or scrolling inside a card resizes the card itself".
 
 ## `CompositionLocal`: scoped values, and when NOT to reach for one
 

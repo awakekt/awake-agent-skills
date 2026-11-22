@@ -58,6 +58,11 @@ framebuffer out to DRAM and read it back on the next pass:
 - Prefer `LOAD_OP_DONT_CARE` / `STORE_OP_DONT_CARE` for transient depth and intermediate targets
   whose contents are not needed across passes.
 - Keep `Low` mobile quality defaults free of anisotropic filtering and expensive multi-tap PCF.
+- **Never let a consumer quality override silently escalate a mobile preset above Core's mobile
+  budget**: `RenderQualitySettings.shadowBudgetOverride` and `effectQualityOverride` on mobile
+  `Auto` / `Low` / `Medium` presets must stay at or below `ShadowBudget.Reduced` (2 × 1024²) and
+  16-bit shadow depth; reserve `ShadowBudget.Default` (3 × 2048²) for explicit `High` or desktop
+  presets, and lock mobile tier ceilings with a preset-budget unit test.
 
 ## Rule 5 — Guard shader and pass costs with automated tests
 

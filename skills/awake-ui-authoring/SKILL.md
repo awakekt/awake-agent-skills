@@ -4,7 +4,7 @@ description: Which UI layer to write in - Compose Foundation, Material 3, or sha
 license: Apache-2.0
 metadata:
   author: awake
-  last-updated: '2026-09-20'
+  last-updated: '2026-11-22'
 ---
 
 # Authoring UI in Awake
@@ -50,25 +50,26 @@ greppable.
 - **Second path** — a capability that already has a home getting another one. One canonical
   mechanism per concern; look the registry up before drawing it yourself.
 
-> **ui-headless holds zero visual policy.** Every colour, radius and inset arrives as a
-> parameter, or nothing is drawn.
+> **`:awake:compose:foundation` holds zero visual policy.** Every colour, radius and inset arrives
+> through `Style` or an explicit parameter, or nothing is drawn.
 
-Counts, the live examples, and the `verifyUiHeadlessAmbientTheme` exemption list are in
+Ownership boundaries, live examples, and the `verifyUiOwnership` checks are in
 [`references/layer-ownership.md`](references/layer-ownership.md).
 
 ## The size rule (this is the one that bites)
 
-> A `ui-headless` widget may only fall back to a size it can derive from **its own content**,
-> **its own font/vector metrics**, or a **physical constraint** (1 device pixel). Any size it
-> cannot derive must be supplied as neutral widget visual/layout data by the caller above it.
+> A `:awake:compose:foundation` primitive or control may only fall back to a size it can derive
+> from **its own content**, **its own font/vector metrics**, or a **physical constraint** (1 device
+> pixel). Any size it cannot derive must be supplied via `Modifier` or `Style` by the design-system
+> recipe above it.
 
-Not "no defaults". Defaults are mandatory here -- this is an immediate-mode UI with a single
-measure pass, so a widget with no intrinsic size measures to **zero** and silently draws
-nothing. The question is never *whether* to have a fallback, only whether it is derivable.
+Not "no defaults". Defaults still matter — in single-pass layout, a leaf with no intrinsic size and
+no incoming constraint measures to **zero** and silently draws nothing. The question is never
+*whether* to have a fallback, only whether it is derivable.
 
-`textarea()` is the reference implementation: its height is
-`fontHeight * minLines + lineGap + contentPadding` -- no magic numbers, scales with the font,
-correct under any theme. Copy that shape.
+`BasicTextField` is the reference shape: its intrinsic height comes from font metrics, line count,
+and caller-supplied padding — no magic design-system constants, scales with the font, correct under
+any theme. Copy that shape.
 
 ### Why this matters more than it looks
 
@@ -102,7 +103,8 @@ x += LABEL_GAP.toPx()
 ```
 
 If surrounding arithmetic is genuinely px-based, still source the value from a `Dp` and convert
-at use. `awake.ui-authored-units-convention` is meant to police this; do not rely on it alone.
+at use. `verifyUiAuthoredUnits` (`com.awakekt.awake.plugin.ui-authored-units`) polices this; do not
+rely on it alone.
 
 ### The inverse trap: pixels wrapped as Dp (applies to SAMPLES too, not just widgets)
 
@@ -136,9 +138,8 @@ Test a real click in blank field padding, not only its semantics or screenshot.
 ## Checklist
 
 - [ ] Would another skin need this code? If yes it is not design-system code.
-- [ ] Every size in a Headless widget is content-derived, metric-derived, a physical minimum,
-      or provided through a generic Headless visual/layout contract -- never Core's component
-      style registry.
+- [ ] Every size in `:awake:compose:foundation` is content-derived, metric-derived, a physical
+      minimum, or supplied by the caller via `Modifier` / `Style` -- never a hidden style registry.
 - [ ] No raw-pixel `Float` constants; authored values are `Dp`, converted at use.
 - [ ] No decoration choice (border width, chosen semantic colour), named variant, or branded
       local such as `LocalShadcnTheme` read in `:awake:compose:foundation`.
@@ -148,15 +149,18 @@ Test a real click in blank field padding, not only its semantics or screenshot.
 - [ ] A public `context(Composer)` `Unit` visual component is a PascalCase noun (`ShadcnButton`),
       not a lowercase helper. Radix decides the component concept; Compose decides visual API
       capitalization. See `references/api-shape.md` for compatibility migration rules.
-- [ ] New behaviour landed in `ui-headless`, not in the `shadcn*` wrapper.
+- [ ] Reusable interaction or layout behaviour landed in `:awake:compose:foundation` (if upstream
+      Compose Foundation ships it), not duplicated across design-system wrappers.
 - [ ] Interactive controls own `clickable` before their internal visual content padding; ordinary
       caller-authored modifier order remains untouched and Compose-faithful.
 - [ ] One public `context(Composer)` function per widget -- no `RowScope`/`ColumnScope`/`BoxScope`
       overload that only changes a default.
-- [ ] No new `ui-headless` `label:`/content-shape overload -- a text label is
-      `widget(id) { text("...") }` through the existing slot, not a second resolution path.
-      `shadcn*` may still expose `label:` as sugar, but its body must call that same slot.
-- [ ] Built exclusively from the 4 Foundational Primitives (`surface`, `row`/`column`/`box`/`spacer`, `text`/`icon`, `Modifier.*`) -- no raw canvas emitters or `interactiveSurface`.
+- [ ] No parallel content-shape overload in `:awake:compose:foundation` -- compose labels through
+      the slot (`{ Text("...") }`), not a second resolution path. Design-system recipes
+      (`ShadcnButton`) may offer `text:` / `label:` sugar, but their body must call that same slot.
+- [ ] Built exclusively from the 4 Foundational Primitives (`Box` + `Modifier.styleable`/draw
+      modifiers, `Row`/`Column`/`Box`/`Spacer`, `Text`/`Image`, `Modifier.*`) -- no raw canvas
+      emitters bypassing Compose layout and draw modifiers.
 - [ ] Every loop that emits widgets wraps each item in `key(stableId) { }`, and a component that
       remembers wraps its body in `rememberGroup`. State is positional; see
       `references/identity-and-catalog.md`.

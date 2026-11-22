@@ -1,10 +1,10 @@
 ---
 name: awake-ui-performance
-description: What makes an Awake UI frame expensive, and the traps that make a change silently cost more than it looks. Read before writing anything that runs inside a `row`/`column`/`surface` content lambda, before adding a per-frame allocation, and before claiming a UI performance improvement. Trigger keywords - per-frame allocation, garbage, GC, frame time, ms per frame, wasm vs desktop performance, trial measure, trial pass, cacheKey, LocalCacheKey, UiFrameAllocationProbe, UiFrameTimeProbeTest, wasmJsBrowserTest, UiMeasureTrialStats, perfStatsEnabled, F2 overlay, slow UI, jank, optimize UI.
+description: What makes an Awake UI frame expensive, and the traps that make a change silently cost more than it looks. Read before writing anything that runs inside a `Row`/`Column`/`Box` content lambda, world-anchored canvas HUD system, or draw block, before adding a per-frame allocation, and before claiming a UI performance improvement. Trigger keywords - per-frame allocation, garbage, GC, frame time, ms per frame, wasm vs desktop performance, intrinsic queries, LayoutStats, ComposeFrameProbe, TextFrameProbe, ComposeHost, measureTextWidth, perfStatsEnabled, F2 overlay, slow UI, jank, optimize UI.
 license: Apache-2.0
 metadata:
   author: awake
-  last-updated: '2026-11-16'
+  last-updated: '2026-11-22'
 ---
 
 # Awake UI performance
@@ -40,6 +40,8 @@ Non-obvious allocators found in this codebase, all of them in hot paths:
 | `addAll(collection)` | copies through `toArray()` | indexed add loop |
 | `for (x in list)` on a `List` | `Iterator` object | indexed loop |
 | `Style { … }` built in a composable body | a style object per call | hoist a constant style to a `val`; key a derived one with `remember` |
+| `map.clear()` followed by re-putting entries every frame | fresh node object (~32 B) per inserted entry | scan a small cached `ArrayList` (`<= 32` items) or update entries in place |
+| `measureTextWidth(...)` or `queryEach(Name::class, CanvasElement::class)` every frame | repeated glyph metrics and full-HUD scans | cache element refs once; re-measure only when `(text, look)` changes |
 
 None of these read as expensive. Every one was a measurable share of the frame.
 
@@ -126,7 +128,9 @@ Three ways this went wrong in practice:
 
 1. **The scene shape decides what you can see.** `ComposeFrameProbe` has no text in it, so text
    cost went unmeasured until a node-graph canvas at rest turned out to spend most of its frame
-   there. Run more than one shape.
+   there. Similarly, an empty-HUD probe with zero open signs, badges, or stacked labels reads
+   0 B/frame while a crowded town allocates per-frame wrappers and re-measures text every tick.
+   Always probe a populated scene shape alongside the empty control.
 2. **The ranking reorders after every fix.** Re-profile between changes. The site predicted to
    dominate (draw primitives) never appeared in the profile at all; the real top site was a map
    copy nobody suspected.
