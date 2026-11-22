@@ -16,14 +16,12 @@ ban, different severity:
 | ambient fallback | `resolved.fill ?: theme.colors.primary` | debt — a skin can still win |
 | ambient override | `drawCheckmark(slot, theme.colors.primaryForeground)` | **bug** — a skin cannot win |
 
-> **ui-headless holds zero visual policy.** Every colour, radius and inset arrives as a
-> parameter, or nothing is drawn. Sizes still follow the size rule in `SKILL.md` — derivable from
-> content, never from a theme.
+> **`:awake:compose:foundation` holds zero visual policy.** Every colour, radius and inset arrives
+> through `Style` or an explicit parameter, or nothing is drawn. Sizes still follow the size rule
+> in `SKILL.md` — derivable from content, never from a theme.
 
-Audited 2026-08-21: 31 ambient fallbacks and 14 ambient overrides. The overrides are why a
-shadcn skin cannot currently restyle a checkbox's checkmark, its indeterminate dash, a radio
-dot, or a toggle's on/off colours. `verifyUiHeadlessAmbientTheme` fails the build on any new
-one; its exemption list is the existing debt and only ever shrinks.
+`verifyUiOwnership` (`com.awakekt.awake.plugin.ui-ownership`, wired into `awakeVerify`) fails the
+build if branded tokens, theme locals, or forbidden UI declarations leak across module boundaries.
 
 ## Second path
 
@@ -41,30 +39,27 @@ type: **if it is a glyph, it comes from the registry; being a path is not an exe
 
 ## Which reference to check a control against
 
-`ui-headless` has no reference today, which is why `combobox` accumulated five defects and
-`select` three before anyone rendered them open. Use two, for different things — and take the
-*runtime* shape from neither, because Awake is immediate-mode and both references are retained:
+When designing or auditing a control in `:awake:ui:shadcn` or `:awake:ui:material3`, check two
+references for different questions:
 
 | Take | From | Why it transfers |
 |---|---|---|
-| Part anatomy, roles, keyboard, state attributes | **Radix / Base UI**, and WAI-ARIA APG for behaviour | A decomposition is not a state model, so it is mode-independent |
+| Part anatomy, roles, keyboard, state attributes | **Radix / Base UI**, and WAI-ARIA APG for behaviour | A decomposition is independent of the rendering backend |
 | Tokens, variant/size enums, Tailwind-class translations | **`shadcn-compose`** (same author, already-solved Kotlin translation) | Pure data |
-| *Nothing* | either one's `remember`/recomposition/callback shape | Awake resolves state by explicit `id` and returns the outcome; see `kmp-api-mimicry`'s "mimic shape, not runtime" |
+| Layout, modifier, and retained runtime contracts | **AndroidX Compose** (`androidx.compose.runtime`/`ui`/`foundation`) | `:awake:compose:*` mirrors Compose's API surface |
 
-Material is not the model for this layer: its signatures fuse `colors`/`elevation` into the
-control, which is the ambient-override defect above promoted to API. It stays useful only as a
-checklist of which controls ought to exist.
+Do not invent non-Compose control APIs inside `:awake:compose:foundation` — if AndroidX Compose
+places a control in Material (`Slider`, `Checkbox`, `Switch`), its styled recipe belongs in
+`:awake:ui:material3` or `:awake:ui:shadcn`, built on `:awake:compose:foundation`'s neutral
+primitives (`Box`, `Row`, `Column`, `Modifier.clickable`, `Modifier.styleable`).
 
-## Behaviour belongs underneath, even when only one skin exists today
+## Reusable layout and interaction primitives belong underneath
 
-If a component owns real structure -- measurement, selection resolution, open/close state,
-traversal -- that behaviour belongs in `ui-headless` even if `ui-designsystem` is its only
-current caller. Several components (Tabs, Collapsible, Dialog, DropdownMenu) were built
-styled-first and now own behaviour that cannot be reused or reskinned without dragging shadcn
-in. That is a debt, not a pattern to copy.
-
-The exception is genuine *composition*: a branded arrangement of existing primitives with no new
-behaviour is correctly design-system-only.
+If a component needs a generic layout, gesture, or focus primitive that AndroidX Compose Foundation
+already ships, implement that primitive in `:awake:compose:foundation` rather than re-deriving it
+inside a design-system recipe. Conversely, if a behaviour is specific to a branded control (such as
+a shadcn variant style or thumb geometry), keep it in `:awake:ui:shadcn` so foundation stays
+skin-neutral and Compose-faithful.
 
 ## Foundation consumes `Style`, not a theme recipe
 
@@ -85,20 +80,18 @@ Core-theme fallback: `LocalShadcnTheme` defaults to `null` and `shadcnTheme` thr
 provider, so metrics and branded roles are never silently rebuilt from a generic theme. Do not
 add `ShadcnTheme` or other branded APIs to the compose modules.
 
-## Design System may use Core infrastructure, never Core widget primitives
+## Design systems compose `:awake:compose:*` primitives, never raw canvas emitters
 
-`ui-designsystem` may have an **internal** (`implementation`) dependency on `ui-core` for
-`Style`, theme/text providers, CompositionLocal mechanics, and runtime-free value adapters. It
-must not expose Core types from its public API.
-
-A design-system recipe still calls Headless widgets for behavior. It must not claim slots, draw,
-hit-test, record semantics, or call Core layout/control primitives directly. If a recipe needs
-that, extend Headless with the missing generic behavior or slot API; duplicated behavior is a
-Headless API gap, not a reason to bypass it.
+`:awake:ui:shadcn` and `:awake:ui:material3` build on `:awake:compose:runtime`, `:awake:compose:ui`,
+and `:awake:compose:foundation` (`Box`, `Row`, `Column`, `Spacer`, `Text`, `BasicTextField`,
+`Image`, `Style`, `Modifier.styleable`, `CompositionLocal`). Recipes must not drop below
+`:awake:compose:ui` to emit raw canvas draw lists, bypass pointer/hit-test dispatch, or duplicate
+layout measurement that belongs in `:awake:compose:foundation`.
 
 ## Do not add a per-component style registry to `:awake:compose:*`
 
-A per-component size/recipe registry is visual policy and inevitably turns Core into a hidden
-design system. Headless may accept a generic visual-state contract; `ui-designsystem` supplies the
-actual branded sizes, colours, and radii by mapping its named variant to that neutral contract. A
-Headless fallback must remain content-derived, metric-derived, or a physical constraint.
+A per-component size/recipe registry is visual policy and inevitably turns `:awake:compose:*` into
+a hidden design system. `:awake:compose:foundation` accepts generic `Style` and `Modifier`;
+`:awake:ui:shadcn` and `:awake:ui:material3` supply the branded sizes, colours, and radii by
+mapping named variants to that neutral contract. Any fallback in `:awake:compose:foundation` must
+remain content-derived, metric-derived, or a physical constraint.

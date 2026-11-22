@@ -1,6 +1,6 @@
 # Translating shadcn into Awake
 
-Extends `SKILL.md`. Read when porting a shadcn class string into a `ui-designsystem` recipe.
+Extends `SKILL.md`. Read when porting a shadcn class string into an `:awake:ui:shadcn` recipe.
 
 ## Always read all three sources before writing a component
 
@@ -11,7 +11,7 @@ skipping one has produced a different failure each time.
 |---|---|---|
 | **1. shadcn/ui upstream** | `tools/shadcn/reference-app/src/ui/*.tsx`, vendored from the pin | What the component *is* — exact values, variant set, anatomy. The only authority on "what is correct" |
 | **2. `shadcn-compose`** | [github.com/ronjunevaldoz/shadcn-compose](https://github.com/ronjunevaldoz/shadcn-compose) | How the same thing was already solved *in Kotlin*, by the same author, against a Compose-shaped API. A solved translation, not a spec |
-| **3. Awake's existing** | `ui-headless` / `ui-designsystem` | What we already know that neither of them does — the bugs this repo actually shipped and fixed |
+| **3. Awake's existing** | `:awake:compose:foundation` / `:awake:ui:shadcn` | What we already know that neither of them does — the bugs this repo actually shipped and fixed |
 
 **What each one catches that the others miss**, from real cases in this port:
 
@@ -66,7 +66,7 @@ that already exists**:
 what all 26 `1f.dp` literals are. Until the generator emits them, a literal with the class named
 beside it is the honest form; see `ShadcnCard`'s `CardBorderWidth`.
 
-Usage today is 8 files in `ui-designsystem` and **zero** in `ui-headless` or `samples`.
+Usage today is concentrated in `:awake:ui:shadcn` rather than `:awake:compose:foundation` or samples.
 
 Do not mass-rewrite the existing literals as a drive-by -- a blind sweep launders wrong values into
 looking intentional. Convert as each file is ported, where the upstream class is in front of you.
@@ -74,12 +74,12 @@ looking intentional. Convert as each file is ported, where the upstream class is
 ## 2. CSS `border-box` means a border CONSUMES layout space; Awake's does not
 
 A shadcn container that is `p-1` plus a `border` insets its content by **border + padding = 5px**,
-not 4px. Awake's border is paint-only: `surfaceCore` insets content by
-`resolved.contentPadding` alone and never by `borderWidth`.
+not 4px. Awake's border is paint-only: `Modifier.border` draws the stroke without shrinking layout
+bounds.
 
 That is deliberate and **Compose-faithful** — Compose's `Modifier.border` is a draw
 modifier, not a layout one, which is exactly why Compose code chains
-`.border(...).padding(...)` to inset content. So do **not** "fix" this in `ui-core`; doing
+`.border(...).padding(...)` to inset content. So do **not** "fix" this in `:awake:compose:ui`; doing
 so would break the Compose parity the engine is built on.
 
 The correct translation is at the recipe: fold the border width into that recipe's own
@@ -117,9 +117,10 @@ stripped first — a doc comment naming the legacy type it replaced is prose doi
 
 ## Where a designsystem constant lives
 
-The size rule in `SKILL.md` governs whether `ui-headless` may have a fallback at all. Once you are
-in `ui-designsystem` supplying a real branded value, the question becomes *where it lives*, and
-that has its own answer — see "Which home a number belongs in" in `awake-shadcn-recipe-authoring`.
+The size rule in `SKILL.md` governs whether `:awake:compose:foundation` may have a fallback at all.
+Once you are in `:awake:ui:shadcn` supplying a real branded value, the question becomes *where it
+lives*, and that has its own answer — see "Which home a number belongs in" in
+`awake-shadcn-recipe-authoring`.
 
 Short form: a Tailwind step names the step (`Tw.Spacing.s1`, not `4f.dp`) even when used once, a
 component's own geometry goes on its `Size` enum, and related values are derived from one

@@ -51,56 +51,45 @@ different defaults), and say why in a comment.
 
 Delete-and-run-the-suite is the check. If nothing moves, the overload was dead.
 
-## Headless: no separate overload for a content shape -- compose it through the slot
+## Foundation: no separate overload for a content shape -- compose it through the slot
 
-`ui-headless` gets exactly ONE widget entry point, and it is the slot/content-lambda form. Do
-not add a parallel headless overload that takes a `label: String` (or any other "convenience"
-data shape) and independently resolves/draws that content itself:
-
-```kotlin
-// Wrong -- a second headless code path that resolves/draws the label on its own
-fun UiScope.button(id: String, label: String, ...)
-
-// Right -- headless has one entry point; the label is composed through its slot
-button(id) { text("Save") }
-```
-
-`button()` currently still has three headless overloads (label, callback, slot) -- that is
-existing debt, not a pattern to extend. Do not add a fourth. This is the same principle as "one
-entry point per widget" above, one level down: it is not just the *scope* that must not fork,
-the headless *content shape* must not fork either.
-
-Why this is stricter than it looks: a `label:` overload has to independently resolve the exact
-same style (weight, size, colour, intrinsic width) the slot path already resolves once via the
-widget's real style-resolution machinery (`resolveInteractiveSurface`/`buttonSlotInternal` for
-`button()`). Re-deriving it a second time for the label path drifts from the first the moment
-either one changes -- caught in this repo only by a snapshot-signature pixel diff (label text
-rendered visibly smaller than the slot path), not by any type check or unit test, after a
-same-session attempt to route the label overload through the slot API silently regressed font
-resolution. One content-shape, one resolution path, no drift possible.
-
-### `shadcn*` MAY offer `label:` -- as long as it calls exactly one headless component
-
-The restriction above is on `ui-headless`, not on `ui-designsystem`. A `shadcn*` recipe is
-allowed a `label: String` convenience parameter -- callers of a design system expect that
-sugar -- but its OWN body must still be built on the single headless slot component, composing
-the label through it, never by calling a headless label-shaped overload:
+A neutral control or container in `:awake:compose:foundation` gets ONE primary entry point, and it
+is the slot/content-lambda form (`context(Composer) () -> Unit`). Do not add a parallel foundation
+overload that takes a `label: String` (or any other convenience data shape) and independently
+resolves and draws that content itself:
 
 ```kotlin
-// Correct: ShadcnButton(label = ...) is fine -- as long as internally it is
-fun UiScope.ShadcnButton(id: String, label: String, ...): Boolean =
-    button(id, style = ...) { shadcnText(label, centered = true) }   // one headless component: button's slot
+// Wrong -- a second resolution path that styles and draws the label on its own
+context(Composer)
+fun Control(label: String, modifier: Modifier = Modifier)
 
-// Wrong: reaching for headless's label overload just because one exists
-fun UiScope.ShadcnButton(id: String, label: String, ...): Boolean =
-    button(id, label = label, style = ...)   // second headless entry point, drifts from the slot path
+// Right -- one slot entry point; the label is composed through its slot
+Box(modifier = Modifier.styleable(styleState, style).clickable(onClick = onClick)) {
+    Text("Save")
+}
 ```
 
-The point of both rules together: every `shadcn*` component maps to exactly ONE headless
-component, called exactly ONE way (its slot). That is what keeps a shadcn recipe's visual
-result guaranteed identical to what its headless primitive actually resolves -- the label-vs-
-slot font-resolution drift above happened because two different code paths existed to resolve
-the same style; collapsing to one path per layer is what prevents it from recurring.
+This is the same principle as "one entry point per widget" above, one level down: neither the
+parent scope nor the content shape should fork into two styling/measurement paths. When a `label:`
+overload independently re-derives font size, weight, colour, or intrinsic width, it drifts from
+the slot path the moment either one changes. One content shape, one resolution path, no drift.
+
+### `:awake:ui:shadcn` MAY offer `label:` / `text:` -- as long as it delegates to the slot overload
+
+The restriction above is on `:awake:compose:foundation`, not on `:awake:ui:shadcn` or
+`:awake:ui:material3`. A design-system recipe may offer a `label: String` or `text: String`
+convenience overload -- callers expect that sugar -- as long as its body delegates straight into
+the recipe's own slot overload rather than duplicating the layout or `Style` resolution:
+
+```kotlin
+// Correct: convenience overload delegates straight to the slot entry point
+context(Composer)
+fun ShadcnButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    ShadcnButton(onClick = onClick, modifier = modifier) {
+        Text(text)
+    }
+}
+```
 
 ## Fill the axis through `Modifier`
 
@@ -118,14 +107,22 @@ caller who wants fill says so in the modifier.
 
 ## The 4 Closed Foundational Primitives Rule
 
-In Awake, every single UI widget is an atomic composition of exactly 4 primitive categories:
+In Awake's `:awake:compose:*` stack, every UI component is an atomic composition of exactly 4
+primitive categories:
 
-1. **Visual Container**: `surface` is the **ONLY** painted rectangular container (background, border, shape, elevation, hover/pressed state). `interactiveSurface` is deprecated/eliminated -- use `surface` with `Modifier.clickable`.
-2. **Spatial Layout Containers**: `row`, `column`, `box`, `spacer` are the **ONLY** spatial layout containers. They do not paint backgrounds; they only distribute bounds.
-3. **Content Leaf Nodes**: `text` and `icon` are the **ONLY** leaf content primitives.
-4. **Behavioral Modifiers**: `Modifier.clickable`, `padding`, `size`, `weight`, `align`, `alpha` are the **ONLY** way to attach behaviors.
+1. **Painted Containers**: `Box` (or `Row`/`Column`) styled with `Modifier.styleable(...)`,
+   `Modifier.background(...)`, `Modifier.border(...)`, and `Modifier.clip(...)` is how painted
+   containers are built — never a bespoke raw-canvas surface primitive.
+2. **Spatial Layout Containers**: `Row`, `Column`, `Box`, and `Spacer` (`:awake:compose:foundation`)
+   are the spatial layout containers. They distribute bounds without owning visual skin policy.
+3. **Content Leaf Nodes**: `Text`, `BasicTextField`, and `Image` (with vector/bitmap painters) are
+   the leaf content primitives.
+4. **Behavioral Modifiers**: `Modifier.clickable`, `padding`, `size`, `weight`, `align`, `alpha`,
+   and `graphicsLayer` attach layout, interaction, and visual effects.
 
-Leaf widgets (`button`, `checkbox`, `switch`, `tabs`, `collapsible`, etc.) must **never** call raw canvas graphics emitters (`emitFillAndBorder`, `emitCheckmark`, `emitRadioDot`) or manually calculate coordinate layouts; they must compose from these 4 primitives.
+Design-system widgets (`ShadcnButton`, `ShadcnCheckbox`, `ShadcnSwitch`, `ShadcnTabs`,
+`ShadcnCollapsible`, etc.) must **never** call raw canvas emitters directly or manually calculate
+sibling coordinates; they compose from these 4 `:awake:compose:*` primitive categories.
 
 ## Widget event idiom: Compose-shaped callbacks
 
