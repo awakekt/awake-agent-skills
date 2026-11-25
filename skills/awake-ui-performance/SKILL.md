@@ -4,7 +4,7 @@ description: What makes an Awake UI frame expensive, and the traps that make a c
 license: Apache-2.0
 metadata:
   author: awake
-  last-updated: '2026-11-22'
+  last-updated: '2026-11-25'
 ---
 
 # Awake UI performance
@@ -60,13 +60,30 @@ leaves as you can: one near the root walks everything beneath it again.
 The tree composes every frame, so an object built in a composable body is built every frame. Hold
 on to what does not change:
 
-- A value derived from inputs: `remember(key) { }`, or `remember(key1, key2) { }`.
+- A value derived from inputs: `remember { }`, `remember(key) { }`, `remember(key1, key2) { }`, or
+  `remember(key1, key2, key3) { }`. All four overloads are `inline`, so a cache hit allocates no
+  closure or type-check lambda (`0 B`).
+- Scoped locals: `CompositionLocalProvider` is `inline`. Prefer the single-value overload
+  `CompositionLocalProvider(local provides value) { }` (no vararg array), or update a reused
+  `ProvidedLocals` instance via `set(local, value)` at host boundaries.
 - A path, gradient or matrix used to draw: `Modifier.drawWithCache { }`. It rebuilds when the
   node's size, density or layout direction changes, and replays the recorded drawing in between.
+- Core containers and leaf widgets: `Box`, `Row`, `Column`, `FlowRow`, `FlowColumn`, and `FlexBox`
+  are `inline` and reuse their `MeasurePolicy` on the retained `LayoutNode` (with pre-allocated
+  policies for standard alignments/arrangements and `Arrangement.spacedBy*` up to `32.dp`). Leaf
+  widgets (`Text`, `Image`, `BasicTextField`, `ShadcnIcon`) keep a `rememberGroup`-scoped state
+  holder that reuses their policy, semantics, and `ModifierNodeElement` chain when inputs match.
+  `LayoutNode` also skips chain rebuilds when given the same `Modifier` instance (`===`).
 
 Text already does this: each text node keeps its last measurement and glyph run in a
 `TextLayoutCache` and reuses them while nothing that shapes the text has changed. Do not shape or
 measure text yourself in a composable body.
+
+**Fix primitive leaks in Core, never in consumer caches.** If a Core primitive (`remember`, `key`,
+`CompositionLocalProvider`, a layout container, a modifier, or a leaf widget) allocates on unchanged
+steady-state frames, fix the primitive in `:awake:compose:*` or `:awake:ui:*` and lock it with a
+desktop allocation test. Never push manual per-widget `*Cache` holder classes or `if (changed)`
+modifier-chain wrappers onto app, editor, or game consumers.
 
 ## Rule 4 - a `remember` key is a cache key, and silent when wrong
 
@@ -88,7 +105,10 @@ Pick the probe by the question. None of them answers another one's question.
 
 **Bytes and ms per frame, desktop only.** `ComposeFrameProbe` holds a byte ceiling that ratchets
 down as fixes land, prints ms/frame beside the total, and splits the bytes by phase.
-`TextFrameProbe` does the same for text that does not change. `ConstraintsAllocationProbe` and
+`TextFrameProbe` does the same for text that does not change. `RememberAndKeyAllocationTest`
+(`:awake:compose:runtime`, under `-XX:-DoEscapeAnalysis`), `ComposePrimitivesAllocationTest`
+(`:awake:compose:foundation`), and `ShadcnIconAllocationTest` (`:awake:ui:shadcn`) enforce `0 B/pass`
+steady-state composition on Core primitives. `ConstraintsAllocationProbe` and
 `InputAdapterAllocationProbe` in `:awake:compose:ui` cover one subsystem each.
 
 ```bash
