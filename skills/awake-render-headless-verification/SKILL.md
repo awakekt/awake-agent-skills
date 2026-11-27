@@ -4,7 +4,7 @@ description: Verify what the engine actually renders, without a window. Read bef
 license: Apache-2.0
 metadata:
   author: awake
-  last-updated: '2026-11-16'
+  last-updated: '2026-11-27'
 ---
 
 # Awake Render: Headless Verification
@@ -24,6 +24,7 @@ capability needed is in the repo:
 | Does the frame the app PRESENTS render right? | `HeadlessSurface` + `Renderer.draw` + `readPresentedPixels` |
 | Does the app's own plan render right? | `VulkanEngine(lifecycle, plan).createBackendResources(HeadlessSurface(w, h))` |
 | Does the app's scene wiring render right? | the above, plus `SceneLoader.instantiate` and `RenderSystem3D.update` |
+| Need to save a captured frame as a PNG for inspection? | `PixelMap.writePng` (`:awake:engine:render:testing`), or `TextureAsset.writePng` / `VulkanEngine.snapshotPng` (`:awake:backend:vulkan`) — never hand-write a PNG writer or pixel loop |
 | What did a shader compute -- normal, depth, shadow, albedo, terrain layers? | a [debug view](https://github.com/awakekt/awake-game-agent-skills/blob/main/skills/awake-render-debug-views/SKILL.md) of any of the above |
 
 Worked examples: `ShowcasePlanFrameTest` (all four layers) and
